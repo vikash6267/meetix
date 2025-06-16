@@ -248,7 +248,7 @@ const SignIn = () => {
 
         try {
             const response = await fetch(
-                'http://localhost:3010/login',
+                'https://meetix.mahitechnocrafts.in/login',
                 {
                     method: 'POST',
                     headers: {

@@ -28,7 +28,7 @@ const ChatPage = () => {
     setError('');
     
     try {
-      const response = await fetch(`http://localhost:3010/chat/${roomId}`);
+      const response = await fetch(`https://meetix.mahitechnocrafts.in/chat/${roomId}`);
       if (!response.ok) throw new Error('Failed to fetch chat data');
       
       const data = await response.json();

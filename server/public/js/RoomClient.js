@@ -6333,7 +6333,7 @@ class RoomClient {
         formData.append('video', blob, recFileName);  // Append the video file and its name to FormData
     
         // Call the upload API
-        fetch('http://localhost:3010/upload-video', {
+        fetch('https://meetix.mahitechnocrafts.in/upload-video', {
             method: 'POST',
             body: formData,  // Send the FormData as the request body
         })

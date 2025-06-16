@@ -270,6 +270,7 @@ const dir = {
     rec: path.join(__dirname, '../', config?.media?.recording?.dir || 'rec', '/'),
     rtmp: path.join(__dirname, '../', config?.media?.rtmp?.dir || 'rtmp', '/'),
 };
+app.use(express.static(dir.public));
 
 // Rec directory create and set max file size
 const recMaxFileSize = config?.media?.recording?.maxFileSize || 1 * 1024 * 1024 * 1024; // 1GB default
@@ -647,8 +648,8 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
 
             log.debug('Direct Join', req.query);
 
-            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:30
-            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token
+            // https://meetix.mahitechnocrafts.in/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:30
+            // https://meetix.mahitechnocrafts.in/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token
 
             const { room, roomPassword, name, audio, video, screen, hide, notify, duration, token, isPresenter } =
                 checkXSS(req.query);
@@ -741,7 +742,7 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
         return res.redirect('/');
     });
 
-    // http://localhost:3010/attendees/:roomID
+    // https://meetix.mahitechnocrafts.in/attendees/:roomID
     //To get the attendees
     app.get('/attendees/:roomId', async (req, res) => {
         const attendees = await Attendee.find({ roomId: req.params.roomId });

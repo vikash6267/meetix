@@ -23,7 +23,7 @@ const RecordingsPage = () => {
   const fetchRecordings = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3010/get-recordings');
+      const response = await axios.get('https://meetix.mahitechnocrafts.in/get-recordings');
       setRecordings(response.data.recordings);
     } catch (err) {
       setError('Failed to fetch recordings. Please try again later.');
