@@ -11,7 +11,7 @@ import ConnectButton from "../../components/ConnectButton/ConnectButton";
 import io from 'socket.io-client';
 
 const LandingPageHeader = () => {
-    const socket = io('https://meetix.mahitechnocrafts.in', {
+    const socket = io('http://localhost:3010', {
         transports: ['websocket'],
         secure: true,
         rejectUnauthorized: false,
@@ -49,7 +49,7 @@ const LandingPageHeader = () => {
             navigate("/login");  // Redirect to login page
             return;
         }
-        window.location.href = "https://meetix.mahitechnocrafts.in";  // Redirect to meeting URL
+        window.location.href = "http://localhost:3010";  // Redirect to meeting URL
     };
 
     // const handleJoinRoom = () => {

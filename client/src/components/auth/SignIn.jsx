@@ -248,7 +248,7 @@ const SignIn = () => {
 
         try {
             const response = await fetch(
-                'https://meetix.mahitechnocrafts.in/login',
+                'http://localhost:3010/login',
                 {
                     method: 'POST',
                     headers: {
@@ -264,7 +264,8 @@ const SignIn = () => {
                 setError(data.message || 'Failed to sign in. Please try again.');
             } else {
                 localStorage.setItem('authToken', data.token);
-                // localStorage.setItem('email', data.email);
+                localStorage.setItem('user', JSON.stringify(data.user));
+
                 // localStorage.setItem('name', data.name);
                 // localStorage.setItem('userId', data.userId);
                 // setIsLoggedIn(true);

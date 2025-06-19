@@ -235,10 +235,20 @@ function joinRoom() {
         return;
     }
 
-    //window.location.href = '/join/' + roomName;
-    window.location.href = '/join/?room=' + roomName;
+    const userId = new URLSearchParams(window.location.search).get('id');
+
+    if (!userId) {
+        popup('error', 'User ID missing.\nPlease login again.');
+        return;
+    }
+
+    const url = `/join/?room=${roomName}&id=${userId}`;
     window.localStorage.lastRoom = roomName;
+
+    // ✅ Redirect to join page
+    window.location.href = url;
 }
+
 
 function isValidRoomName(input) {
     if (!input || typeof input !== 'string') {

@@ -31,6 +31,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     location.pathname === '/developers' || location.pathname.startsWith('/developers/')
   );
 
+  const [isAdminExpanded, setIsAdminExpanded] = useState(
+  location.pathname.startsWith('/admin')
+);
+
+
+const storedUser = localStorage.getItem('user');
+const user = storedUser ? JSON.parse(storedUser) : null;
   return (
     <div
       className={`fixed top-0 left-0 bg-gradient-to-t from-black to-[#2F4F29] text-white w-72 h-screen p-6 overflow-y-auto z-50 transform transition-all duration-300 ease-in-out shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 md:w-64 hide-scrollbar`}
@@ -151,6 +158,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </ul>
         )}
 
+
         <li>
           <div
             onClick={() => setIsMeetingsExpanded(!isMeetingsExpanded)}
@@ -174,7 +182,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <ul className="pl-6 mt-1 space-y-1">
             <li>
               <Link
-                to="https://meetix.mahitechnocrafts.in"
+                to={`http://localhost:3010?id=${user?._id}`}
+                target='_blank'
                 className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/meetings/new'
                     ? 'bg-teal-800 text-white font-medium'
                     : 'text-white hover:bg-[#2F4F29]'
@@ -304,6 +313,68 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             {location.pathname === '/settings' && <FaChevronRight className="text-sm opacity-70" />}
           </Link>
         </li> */}
+
+        {user && user.isAdmin && (
+  <>
+    <li className="pt-4 mt-4 border-t border-[#2F4F29]">
+      <span className="text-xs font-semibold text-white uppercase tracking-wider pl-3">Admin</span>
+    </li>
+
+    <li>
+      <div
+        onClick={() => setIsAdminExpanded(!isAdminExpanded)}
+        className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
+          location.pathname.startsWith('/admin')
+            ? 'bg-[#2F4F29] shadow-lg'
+            : 'hover:bg-[#2F4F29] hover:shadow-md hover:pl-4'
+        }`}
+      >
+        <div className="flex items-center">
+          <FaUserCheck className="mr-3 text-teal-300" />
+          <span>Admin Panel</span>
+        </div>
+        <FaChevronRight
+          className={`text-sm opacity-70 transition-transform ${
+            isAdminExpanded ? 'transform rotate-90' : ''
+          }`}
+        />
+      </div>
+    </li>
+
+    {isAdminExpanded && (
+      <ul className="pl-6 mt-1 space-y-1">
+        <li>
+          <Link
+            to="/admin/users"
+            className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+              location.pathname === '/admin/users'
+                ? 'bg-teal-800 text-white font-medium'
+                : 'text-white hover:bg-[#2F4F29]'
+            }`}
+          >
+            <FaUserCheck className="mr-2 text-xs" />
+            <span>All Users</span>
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/admin/subs"
+            className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+              location.pathname === '/admin/subs'
+                ? 'bg-teal-800 text-white font-medium'
+                : 'text-white hover:bg-[#2F4F29]'
+            }`}
+          >
+            <FaUserCheck className="mr-2 text-xs" />
+            <span> Subscripton</span>
+          </Link>
+        </li>
+       
+      </ul>
+    )}
+  </>
+)}
+
       </ul>
 
       {/* Bottom Decoration */}

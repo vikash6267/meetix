@@ -95,20 +95,24 @@ console.log("first")
 
 
 const getAllSubctrl = async (req, res) => {
-    try {
-        const subscriptions = await subscriptionModel.find({}).populate("userId")
-        return res.status(200).json({
-            success: true,
-            subscriptions,
-        });
-    } catch (error) {
-        console.error("Error in getAllSubctrl:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Error in getting subscription",
-        });
-    }
+  try {
+    const subscriptions = await subscriptionModel
+      .find({})
+      .populate("usersEnroled.user"); // Populate enrolled users
+
+    return res.status(200).json({
+      success: true,
+      subscriptions,
+    });
+  } catch (error) {
+    console.error("Error in getAllSubctrl:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in getting subscriptions",
+    });
+  }
 };
+
 
 
 
@@ -147,7 +151,10 @@ const createSubscription = async (req, res) => {
 
 const getAllSubscriptions = async (req, res) => {
   try {
-    const subscriptions = await subscriptionModel.find();
+   const subscriptions = await subscriptionModel
+      .find({})
+      .populate("usersEnroled.user"); // Populate enrolled users
+
     res.status(200).json({ success: true, subscriptions });
   } catch (error) {
     console.error("Get All Subscriptions Error:", error);
@@ -182,11 +189,70 @@ const getUserSubscriptionsCtrl = async (req, res) => {
 };
 
 
+const addMeetingToUser = async (userId, roomId) => {
+  try {
+    // 1. Add to `meetings`
+    await authModel.findByIdAndUpdate(
+      userId,
+      {
+        $push: {
+          meetings: {
+            roomId,
+            joinedAt: new Date(),
+          },
+        },
+      },
+      { new: true }
+    );
+
+    // 2. Update the corresponding upcoming meeting
+    await authModel.updateOne(
+      { _id: userId, "upCommingMeetings.roomId": roomId },
+      {
+        $set: {
+          "upCommingMeetings.$.isJoined": true,
+          "upCommingMeetings.$.joinedAt": new Date(),
+        },
+      }
+    );
+  } catch (err) {
+    console.error("Error adding meeting to user:", err);
+  }
+};
+
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await authModel.find()
+      .populate({
+        path: 'subscriptions.service',
+        model: 'Subscriptions', // Must match your Subscriptions model name
+      })
+      .sort({ createdAt: -1 }); // Optional: recent users first
+
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching users',
+    });
+  }
+};
+
+
+
 module.exports = { 
     createSubscriptionCtrl, 
     verifyPaymentCtrl, 
     getAllSubctrl,
     createSubscription,
     getAllSubscriptions,
-    getUserSubscriptionsCtrl
+    getUserSubscriptionsCtrl,
+    addMeetingToUser,
+    getAllUsers
  }

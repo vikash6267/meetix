@@ -33,10 +33,10 @@ const subscriptionsSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-   
-   
 
-        usersEnroled: [
+
+
+    usersEnroled: [
       {
         user: {
           type: mongoose.Schema.Types.ObjectId,
@@ -52,14 +52,7 @@ const subscriptionsSchema = new mongoose.Schema(
           type: Date,
           required: true,
         },
-        // razorpay_order_id: { // Add this field
-        //   type: String,
-        //   required: true,
-        // },
-        // razorpay_payment_id: { // Add this field
-        //   type: String,
-        //   required: true,
-        // },
+
         transaction_id: { // Add this field
           type: String,
         },
@@ -67,9 +60,9 @@ const subscriptionsSchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
-        expiryMail:{
-          type:Number,
-          default:0
+        expiryMail: {
+          type: Number,
+          default: 0
         }
       },
     ],

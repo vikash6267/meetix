@@ -37,6 +37,8 @@ import ProPlans from './pages/ProPlansPage/ProPlansPage';
 import BusinessPlans from './pages/BusinessPlanPage/BusinessPlansPage';
 import BookDemo from './pages/BookDemoPage/BookDemoPage';
 import SessionPage from './components/SessionPage/SessionPage';
+import User from './pages/Admin/User';
+import SubscriptionDashboard from './pages/Admin/Subscription';
 
 export const router = createBrowserRouter([
   // { path: '/', element: <IntroductionPage /> },
@@ -51,6 +53,8 @@ export const router = createBrowserRouter([
   { path: '/dashboard/attendance', element: <AttendancePage /> },
   { path: '/dashboard/chat-messages', element: <ChatPage /> },
   // { path: '/dashboard/session', element: <SessionPage /> },
+  { path: '/admin/users', element: <User /> },
+  { path: '/admin/subs', element: <SubscriptionDashboard /> },
   { path: '/meetings/new', element: <NewMeetingPage /> },
   { path: '/meetings/upcoming', element: <UpcomingMeetingPage /> },
   { path: '/meetings/completed', element: <CompletedMeetingPage /> },

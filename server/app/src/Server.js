@@ -141,6 +141,8 @@ const nodemailer = require('./lib/nodemailer');
 // Slack API
 const CryptoJS = require('crypto-js');
 const qS = require('qs');
+const { addMeetingToUser } = require('../api/controllers/subscriptionCtrl.js');
+const { checkRoomParticipantLimit } = require('./middleware/subscriptionLimits.js');
 const slackEnabled = config?.integrations?.slack?.enabled || false;
 const slackSigningSecret = config?.integrations?.slack?.signingSecret || '';
 
@@ -304,9 +306,10 @@ const views = {
     room: path.join(__dirname, '../../', 'public/views/Room.html'),
     rtmpStreamer: path.join(__dirname, '../../', 'public/views/RtmpStreamer.html'),
     whoAreYou: path.join(__dirname, '../../', 'public/views/whoAreYou.html'),
+    loginLAlert: path.join(__dirname, '../../', 'public/views/LoginAlert.html'),
 };
 
-const filesPath = [views.landing, views.newRoom, views.room, views.login];
+const filesPath = [views.landing, views.newRoom, views.room, views.login,views.loginLAlert]
 
 const htmlInjector = new HtmlInjector(filesPath, config.ui.brand);
 
@@ -579,6 +582,7 @@ app.use(cookieParser()); // to parse cookies
         res.status(200).json({ message: config?.ui?.buttons || false });
     });
 app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
+app.use("/api/v1/user", require("../api/routes/userRoutes.js"))
 
     // Brand configuration
     app.get('/brand', (req, res) => {
@@ -586,21 +590,43 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
     });
 
     // main page
-    app.get('/', OIDCAuth, (req, res) => {
-        //log.debug('/ - hostCfg ----->', hostCfg);
+   // Main page
+app.get('/', OIDCAuth, async (req, res) => {
+    const userId = req.query.id;
+    const ip = getIP(req);
+
+    // 1. If ID is missing, inject the "please login" page
+    if (!userId) {
+        return htmlInjector.injectHtml(views.loginLAlert, res);
+    }
+
+    try {
+        // 🔐 2. Validate if user exists in DB
+        const user = await User.findById(userId);
+        if (!user) {
+            return htmlInjector.injectHtml(views.loginLAlert, res); // Invalid user
+        }
+
+        // 3. If OIDC is disabled AND host is protected, check allowed IPs
         if (!OIDC.enabled && hostCfg.protected) {
-            const ip = getIP(req);
             if (allowedIP(ip)) {
-                htmlInjector.injectHtml(views.landing, res);
                 hostCfg.authenticated = true;
+                return htmlInjector.injectHtml(views.landing, res);
             } else {
                 hostCfg.authenticated = false;
-                res.redirect('/login');
+                return res.redirect('/login');
             }
-        } else {
-            return htmlInjector.injectHtml(views.landing, res);
         }
-    });
+
+        // 4. Default behavior (OIDC enabled or protection disabled)
+        return htmlInjector.injectHtml(views.landing, res);
+    } catch (err) {
+        console.error('Error validating user:', err);
+        return htmlInjector.injectHtml(views.loginLAlert, res); // Also redirect on DB errors
+    }
+});
+
+
 
     // Route to display rtmp streamer
     app.get('/rtmp', OIDCAuth, (req, res) => {
@@ -611,9 +637,14 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
     });
 
     // set new room name and join
-    app.get('/newroom', OIDCAuth, (req, res) => {
+    app.get('/newroom', OIDCAuth, async(req, res) => {
         //log.info('/newroom - hostCfg ----->', hostCfg);
-
+    const userId = req.query.id;
+ // 🔐 2. Validate if user exists in DB
+        const user = await User.findById(userId);
+        if (!user) {
+            return htmlInjector.injectHtml(views.loginLAlert, res); // Invalid user
+        }
         if (!OIDC.enabled && hostCfg.protected) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
@@ -646,10 +677,30 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
         if (Object.keys(req.query).length > 0) {
             //log.debug('/join/params - hostCfg ----->', hostCfg);
 
-            log.debug('Direct Join', req.query);
+            log.debug('Direct Join', req.query.id);
+            const roomId = req.query.room
+            const userId = req.query.id
+            console.log("roomId",roomId)
+            console.log("userId",userId)
+ const existingUsers = await User.find({ 'meetings.roomId': roomId });
 
-            // https://meetix.mahitechnocrafts.in/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:30
-            // https://meetix.mahitechnocrafts.in/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token
+
+    if (existingUsers.length > 0) {
+      console.log(`⚠️ Room '${roomId}' is already in use by ${existingUsers.length} user(s):`);
+      existingUsers.forEach((user, index) => {
+        console.log(`User ${index + 1}:`, {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          meetings: user.meetings,
+        });
+      });
+    } else {
+      // ✅ Safe to add meeting to user
+      await addMeetingToUser(userId, roomId);
+    }
+            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:30
+            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token
 
             const { room, roomPassword, name, audio, video, screen, hide, notify, duration, token, isPresenter } =
                 checkXSS(req.query);
@@ -742,7 +793,7 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
         return res.redirect('/');
     });
 
-    // https://meetix.mahitechnocrafts.in/attendees/:roomID
+    // http://localhost:3010/attendees/:roomID
     //To get the attendees
     app.get('/attendees/:roomId', async (req, res) => {
         const attendees = await Attendee.find({ roomId: req.params.roomId });
@@ -809,7 +860,7 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
             const expiresIn = jwtCfg.JWT_EXP || '1h';
 
             const token = jwt.sign(payload, secret);
-            res.status(200).json({ message: 'Login successful', token });
+            res.status(200).json({ message: 'Login successful', token,user });
         } catch (err) {
             console.error('Login Error:', err);
             res.status(500).json({ message: 'Server error' });
@@ -893,6 +944,33 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
     app.get('/join/:roomId', async (req, res) => {
         //
         const { roomId } = checkXSS(req.params);
+  const userId = req.query.id;
+
+
+  
+  try {
+    // 🔍 Find users who already joined this room
+    const existingUsers = await User.find({ 'meetings.roomId': roomId });
+
+
+    if (existingUsers.length > 0) {
+      console.log(`⚠️ Room '${roomId}' is already in use by ${existingUsers.length} user(s):`);
+      existingUsers.forEach((user, index) => {
+        console.log(`User ${index + 1}:`, {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          meetings: user.meetings,
+        });
+      });
+    } else {
+      // ✅ Safe to add meeting to user
+      await addMeetingToUser(userId, roomId);
+    }
+  } catch (err) {
+    console.error('❌ Error checking/saving meeting:', err);
+  }
+
 
         if (!roomId) {
             log.warn('/join/:roomId empty', roomId);
@@ -1230,17 +1308,17 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
     });
 
     // Join roomId redirect to /join?room=roomId
-    app.get('/:roomId', (req, res) => {
-        const { roomId } = checkXSS(req.params);
+    // app.get('/:roomId', (req, res) => {
+    //     const { roomId } = checkXSS(req.params);
 
-        if (!roomId) {
-            log.warn('/:roomId empty', roomId);
-            return res.redirect('/');
-        }
+    //     if (!roomId) {
+    //         log.warn('/:roomId empty', roomId);
+    //         return res.redirect('/');
+    //     }
 
-        log.debug('Detected roomId --> redirect to /join?room=roomId');
-        res.redirect(`/join/${roomId}`);
-    });
+    //     log.debug('Detected roomId --> redirect to /join?room=roomId');
+    //     res.redirect(`/join/${roomId}`);
+    // });
 
     // ####################################################
     // REST API
@@ -1694,14 +1772,41 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
         });
 
         socket.on('join', async (dataObject, cb) => {
-            console.log('Room Id: ', dataObject.room_id);
-            socket.room_id = dataObject.room_id;
-            if (!roomExists(socket)) {
-                return cb({
-                    error: 'Room does not exist',
-                });
-            }
+            // console.log('Room Id: ', dataObject.room_id);
+         socket.room_id = dataObject.room_id
 
+  if (!roomExists(socket)) {
+    return cb({
+      error: "Room does not exist",
+    })
+  }
+
+  // Check participant limits BEFORE processing join
+  const room = getRoom(socket)
+  const currentParticipants = room.getPeersCount()
+
+  const limitCheck = await checkRoomParticipantLimit(socket.room_id, currentParticipants + 1)
+
+  if (!limitCheck.allowed) {
+    console.log("❌ Join denied - limit exceeded:", {
+      roomId: socket.room_id,
+      currentParticipants: currentParticipants,
+      limit: limitCheck.limit,
+    })
+
+    return cb({
+      error: "limitExceeded",
+      message: limitCheck.message,
+      limit: limitCheck.limit,
+      currentParticipants: currentParticipants,
+    })
+  }
+
+  console.log("✅ Join allowed:", {
+    roomId: socket.room_id,
+    currentParticipants: currentParticipants,
+    limit: limitCheck.limit,
+  })
             // Get peer IPv4 (::1 Its the loopback address in ipv6, equal to 127.0.0.1 in ipv4)
             const peer_ip = getIpSocket(socket);
 
@@ -1712,15 +1817,14 @@ app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
 
             const data = checkXSS(dataObject);
 
-            log.info('User joined', data);
+            // log.info('User joined', data);
 
             if (!Validator.isValidRoomName(socket.room_id)) {
                 log.warn('[Join] - Invalid room name', socket.room_id);
                 return cb('invalid');
             }
 
-            const room = getRoom(socket);
-
+           
             const { peer_name, peer_id, peer_uuid, peer_token, os_name, os_version, browser_name, browser_version } =
                 data.peer_info;
 

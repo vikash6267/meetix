@@ -457,11 +457,37 @@ class RoomClient {
             });
     }
 
+
+    limitExceeded()
+{
+  this.sound("alert")
+  Swal.fire({
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    showDenyButton: false,
+    showConfirmButton: true,
+    background: swalBackground,
+    imageUrl: image.users, // or create a specific limit exceeded image
+    title: "Room Full",
+    text: "The room has reached the maximum participant limit based on the host's subscription plan.",
+    confirmButtonText: `Ok`,
+    showClass: { popup: "animate__animated animate__fadeInDown" },
+    hideClass: { popup: "animate__animated animate__fadeOutUp" },
+  }).then(() => {
+    this.exit()
+  })
+}
+
     async join(data) {
         this.socket
             .request('join', data)
             .then(async (room) => {
                 console.log('##### JOIN ROOM #####', room);
+
+                  if (room.error === "limitExceeded") {
+        console.warn("00-WARNING ----> Room participant limit exceeded")
+        return this.limitExceeded()
+      }
 
                 if (room === 'invalid') {
                     console.warn('00-WARNING ----> Invalid Room name! Path traversal pattern detected!');
@@ -6333,7 +6359,7 @@ class RoomClient {
         formData.append('video', blob, recFileName);  // Append the video file and its name to FormData
     
         // Call the upload API
-        fetch('https://meetix.mahitechnocrafts.in/upload-video', {
+        fetch('http://localhost:3010/upload-video', {
             method: 'POST',
             body: formData,  // Send the FormData as the request body
         })
@@ -7785,6 +7811,28 @@ class RoomClient {
             this.exit();
         });
     }
+
+
+    limitExceeded() {
+    this.sound('alert');
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showDenyButton: false,
+        showConfirmButton: true,
+        background: swalBackground,
+        imageUrl: image.warning, // Use a relevant image/icon
+        title: 'Room Full',
+        text: 'The room has reached the maximum participant limit.',
+        confirmButtonText: `Ok`,
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then(() => {
+        this.exit();
+    });
+}
+
+
 
     // ####################################################
     // HANDLE AUDIO VOLUME
