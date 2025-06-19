@@ -20,6 +20,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 // ####################################################
 
 console.log('Window Location', window.location);
+// <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 const userAgent = navigator.userAgent;
 const parser = new UAParser(userAgent);
@@ -418,45 +419,84 @@ function initClient() {
 // HANDLE MAIN BUTTONS TOOLTIP
 // ####################################################
 
-function refreshMainButtonsToolTipPlacement() {
-    if (!isMobileDevice) {
-        //
-        const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value;
-        const placement = position == 'vertical' ? 'right' : 'top';
-        const bPlacement = position == 'vertical' ? 'top' : 'right';
 
-        // Control buttons
-        setTippy('shareButton', 'Share room', placement);
-        setTippy('hideMeButton', 'Toggle hide self view', placement);
-        setTippy('startRecButton', 'Start recording', placement);
-        setTippy('stopRecButton', 'Stop recording', placement);
-        setTippy('fullScreenButton', 'Toggle full screen', placement);
-        setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
-        setTippy('pollButton', 'Toggle the poll', placement);
-        setTippy('editorButton', 'Toggle the editor', placement);
-        setTippy('transcriptionButton', 'Toggle transcription', placement);
-        setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
-        setTippy('documentPiPButton', 'Toggle Document picture in picture', placement);
-        setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
-        setTippy('restartICEButton', 'Restart ICE', placement);
-        setTippy('aboutButton', 'About this project', placement);
+async function refreshMainButtonsToolTipPlacement() {
+  if (!isMobileDevice) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get("room");
+    const name = urlParams.get("name");
 
-        // Bottom buttons
-        setTippy('toggleExtraButton', 'Toggle extra buttons', bPlacement);
-        setTippy('startAudioButton', 'Start the audio', bPlacement);
-        setTippy('stopAudioButton', 'Stop the audio', bPlacement);
-        setTippy('startVideoButton', 'Start the video', bPlacement);
-        setTippy('stopVideoButton', 'Stop the video', bPlacement);
-        setTippy('swapCameraButton', 'Swap the camera', bPlacement);
-        setTippy('startScreenButton', 'Start screen share', bPlacement);
-        setTippy('stopScreenButton', 'Stop screen share', bPlacement);
-        setTippy('raiseHandButton', 'Raise your hand', bPlacement);
-        setTippy('lowerHandButton', 'Lower your hand', bPlacement);
-        setTippy('chatButton', 'Toggle the chat', bPlacement);
-        setTippy('settingsButton', 'Toggle the settings', bPlacement);
-        setTippy('exitButton', 'Leave room', bPlacement);
+    let isSubscription = false;
+
+    if (roomId ) {
+      try {
+        const response = await fetch("http://localhost:3010/api/v1/user/testmeeting", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            roomId: roomId,
+            testmittingValue: "name",
+          }),
+        });
+        console.log(response)
+
+        const result = await response.json();
+        isSubscription = result.isSubscription === true;
+      } catch (error) {
+        console.error("Error checking subscription:", error);
+      }
     }
+
+    // 🔒 Show or hide recording buttons based on subscription
+    const startRecBtn = document.getElementById("startRecButton");
+    const stopRecBtn = document.getElementById("stopRecButton");
+
+    if (!isSubscription) {
+      if (startRecBtn) startRecBtn.style.display = "none";
+      if (stopRecBtn) stopRecBtn.style.display = "none";
+    } else {
+      if (startRecBtn) startRecBtn.style.display = "";
+      if (stopRecBtn) stopRecBtn.style.display = "";
+    }
+
+    // ✅ Tooltip placement
+    const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value;
+    const placement = position == 'vertical' ? 'right' : 'top';
+    const bPlacement = position == 'vertical' ? 'top' : 'right';
+
+    setTippy('shareButton', 'Share room', placement);
+    setTippy('hideMeButton', 'Toggle hide self view', placement);
+    setTippy('startRecButton', 'Start recording', placement);
+    setTippy('stopRecButton', 'Stop recording', placement);
+    setTippy('fullScreenButton', 'Toggle full screen', placement);
+    setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
+    setTippy('pollButton', 'Toggle the poll', placement);
+    setTippy('editorButton', 'Toggle the editor', placement);
+    setTippy('transcriptionButton', 'Toggle transcription', placement);
+    setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
+    setTippy('documentPiPButton', 'Toggle Document picture in picture', placement);
+    setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
+    setTippy('restartICEButton', 'Restart ICE', placement);
+    setTippy('aboutButton', 'About this project', placement);
+
+    setTippy('toggleExtraButton', 'Toggle extra buttons', bPlacement);
+    setTippy('startAudioButton', 'Start the audio', bPlacement);
+    setTippy('stopAudioButton', 'Stop the audio', bPlacement);
+    setTippy('startVideoButton', 'Start the video', bPlacement);
+    setTippy('stopVideoButton', 'Stop the video', bPlacement);
+    setTippy('swapCameraButton', 'Swap the camera', bPlacement);
+    setTippy('startScreenButton', 'Start screen share', bPlacement);
+    setTippy('stopScreenButton', 'Stop screen share', bPlacement);
+    setTippy('raiseHandButton', 'Raise your hand', bPlacement);
+    setTippy('lowerHandButton', 'Lower your hand', bPlacement);
+    setTippy('chatButton', 'Toggle the chat', bPlacement);
+    setTippy('settingsButton', 'Toggle the settings', bPlacement);
+    setTippy('exitButton', 'Leave room', bPlacement);
+  }
 }
+
 
 // ####################################################
 // HANDLE TOOLTIP
@@ -2022,15 +2062,18 @@ function handleButtons() {
     lowerHandButton.onclick = () => {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
     };
-    toggleExtraButton.onclick = () => {
-        toggleExtraButtons();
-        if (!isMobileDevice) {
-            isToggleExtraBtnClicked = true;
-            setTimeout(() => {
-                isToggleExtraBtnClicked = false;
-            }, 2000);
-        }
-    };
+toggleExtraButton.onclick = async () => {
+   
+
+    toggleExtraButtons();
+    if (!isMobileDevice) {
+        isToggleExtraBtnClicked = true;
+        setTimeout(() => {
+            isToggleExtraBtnClicked = false;
+        }, 2000);
+    }
+};
+
     toggleExtraButton.onmouseover = () => {
         if (isToggleExtraBtnClicked || isMobileDevice) return;
         if (control.style.display === 'none') {

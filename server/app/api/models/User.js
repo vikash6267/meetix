@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  testmitting: { type: String,  },
   subscriptions: [
     {
       service: {
@@ -56,6 +57,20 @@ const userSchema = new mongoose.Schema({
       joinedAt:{ type: Date, default: Date.now}
     }
   ],
+recordings: [
+  {
+    roomId: { type: String },
+    url: { type: String },
+    fileName: { type: String },
+    size: { type: String },
+    codecs: { type: String },
+    device: { type: String },
+    duration: { type: String }, // Optional: If you want recording duration
+    storedType: { type: String, default: "Locally" },
+    date: { type: Date, default: Date.now }
+  }
+],
+
   createdAt: { type: Date, default: Date.now }
 });
 

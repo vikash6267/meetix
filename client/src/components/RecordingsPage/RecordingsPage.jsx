@@ -11,7 +11,8 @@ const RecordingsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const recordingsPerPage = 8;
-
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -23,10 +24,13 @@ const RecordingsPage = () => {
   const fetchRecordings = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3010/get-recordings');
+      const response = await axios.get(
+        `http://localhost:3010/api/v1/user/recordings/${user?._id}`,
+      );
+      console.log(response.data.recordings);
       setRecordings(response.data.recordings);
     } catch (err) {
-      setError('Failed to fetch recordings. Please try again later.');
+      // setError('Failed to fetch recordings. Please try again later.');
       console.error('Error fetching recordings:', err);
     } finally {
       setLoading(false);
@@ -40,7 +44,7 @@ const RecordingsPage = () => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -50,14 +54,20 @@ const RecordingsPage = () => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const filteredRecordings = recordings.filter(recording =>
-    recording.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    formatDate(recording.properties.createdOn).toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRecordings = recordings.filter(
+    (recording) =>
+      recording.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      formatDate(recording.date)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()),
   );
 
   const indexOfLastRecording = currentPage * recordingsPerPage;
   const indexOfFirstRecording = indexOfLastRecording - recordingsPerPage;
-  const currentRecordings = filteredRecordings.slice(indexOfFirstRecording, indexOfLastRecording);
+  const currentRecordings = filteredRecordings.slice(
+    indexOfFirstRecording,
+    indexOfLastRecording,
+  );
   const totalPages = Math.ceil(filteredRecordings.length / recordingsPerPage);
 
   return (
@@ -75,7 +85,9 @@ const RecordingsPage = () => {
           <div className="max-w-6xl mx-auto">
             {/* Keep the rest of your existing JSX structure the same */}
             <div className="flex justify-between items-center mb-8">
-              <h1 className="text-2xl font-bold text-gray-800">Meeting Recordings</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Meeting Recordings
+              </h1>
               <button
                 onClick={fetchRecordings}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
@@ -114,48 +126,59 @@ const RecordingsPage = () => {
             ) : currentRecordings.length === 0 ? (
               <div className="bg-white rounded-lg shadow p-6 text-center">
                 <p className="text-gray-600">
-                  {searchTerm ? 'No recordings match your search.' : 'No recordings available.'}
+                  {searchTerm
+                    ? 'No recordings match your search.'
+                    : 'No recordings available.'}
                 </p>
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {currentRecordings.map((recording) => (
-                    <div key={recording.name} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-medium text-gray-800 truncate">
-                            {recording.name.replace('recording.webm', '').replace(/-/g, ' ')}
-                          </h3>
-                          <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
-                            {formatFileSize(recording.properties.contentLength)}
-                          </span>
-                        </div>
-                        <p className="text-gray-500 text-sm mb-4">
-                          {formatDate(recording.properties.createdOn)}
-                        </p>
-                        <div className="flex space-x-2">
-                          <a
-                            href={recording.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 bg-indigo-600 text-white text-center py-2 rounded-md hover:bg-indigo-700 transition-colors"
-                          >
-                            Download
-                          </a>
-                          <button className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors">
-                            <i className="fas fa-info-circle"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+               {currentRecordings.map((recording) => (
+  <div key={recording._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="p-4">
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="font-medium text-gray-800 truncate">
+          {recording.fileName.replace('recording.webm', '').replace(/-/g, ' ')}
+        </h3>
+        <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
+          {recording.size}
+        </span>
+      </div>
+
+      {/* Date */}
+      <p className="text-gray-500 text-sm">{formatDate(recording.date)}</p>
+
+      {/* Room ID */}
+      <p className="text-sm text-gray-400 mt-1">
+        <span className="font-medium text-gray-600">Room ID:</span> {recording.roomId}
+      </p>
+
+      <div className="flex space-x-2 mt-4">
+        <a
+          href={recording.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 bg-indigo-600 text-white text-center py-2 rounded-md hover:bg-indigo-700 transition-colors"
+        >
+          Download
+        </a>
+        <button className="bg-gray-200 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-300 transition-colors">
+          <i className="fas fa-info-circle"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+))}
+
                 </div>
 
                 {totalPages > 1 && (
                   <div className="flex justify-center space-x-2">
                     <button
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
                       disabled={currentPage === 1}
                       className="px-4 py-2 border rounded-md disabled:opacity-50"
                     >
@@ -171,7 +194,9 @@ const RecordingsPage = () => {
                       </button>
                     ))}
                     <button
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
                       disabled={currentPage === totalPages}
                       className="px-4 py-2 border rounded-md disabled:opacity-50"
                     >

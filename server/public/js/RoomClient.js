@@ -458,25 +458,24 @@ class RoomClient {
     }
 
 
-    limitExceeded()
-{
-  this.sound("alert")
-  Swal.fire({
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    showDenyButton: false,
-    showConfirmButton: true,
-    background: swalBackground,
-    imageUrl: image.users, // or create a specific limit exceeded image
-    title: "Room Full",
-    text: "The room has reached the maximum participant limit based on the host's subscription plan.",
-    confirmButtonText: `Ok`,
-    showClass: { popup: "animate__animated animate__fadeInDown" },
-    hideClass: { popup: "animate__animated animate__fadeOutUp" },
-  }).then(() => {
-    this.exit()
-  })
-}
+    limitExceeded() {
+        this.sound("alert")
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showDenyButton: false,
+            showConfirmButton: true,
+            background: swalBackground,
+            imageUrl: image.users, // or create a specific limit exceeded image
+            title: "Room Full",
+            text: "The room has reached the maximum participant limit based on the host's subscription plan.",
+            confirmButtonText: `Ok`,
+            showClass: { popup: "animate__animated animate__fadeInDown" },
+            hideClass: { popup: "animate__animated animate__fadeOutUp" },
+        }).then(() => {
+            this.exit()
+        })
+    }
 
     async join(data) {
         this.socket
@@ -484,10 +483,10 @@ class RoomClient {
             .then(async (room) => {
                 console.log('##### JOIN ROOM #####', room);
 
-                  if (room.error === "limitExceeded") {
-        console.warn("00-WARNING ----> Room participant limit exceeded")
-        return this.limitExceeded()
-      }
+                if (room.error === "limitExceeded") {
+                    console.warn("00-WARNING ----> Room participant limit exceeded")
+                    return this.limitExceeded()
+                }
 
                 if (room === 'invalid') {
                     console.warn('00-WARNING ----> Invalid Room name! Path traversal pattern detected!');
@@ -622,7 +621,7 @@ class RoomClient {
             if (BUTTONS.settings.tabRecording) {
                 room.config.hostOnlyRecording
                     ? (console.log('07.1 ----> WARNING Room Host only recording enabled'),
-                      this.event(_EVENTS.hostOnlyRecordingOn))
+                        this.event(_EVENTS.hostOnlyRecordingOn))
                     : this.event(_EVENTS.hostOnlyRecordingOff);
             }
 
@@ -1988,7 +1987,7 @@ class RoomClient {
                         imageUrlInput.value = clipboardText;
                     }
                 })
-                .catch(() => {});
+                .catch(() => { });
         }
 
         saveImageUrlBtn.addEventListener('click', async () => {
@@ -5007,8 +5006,8 @@ class RoomClient {
             peerAvatar && this.isImageURL(peerAvatar)
                 ? peerAvatar
                 : this.isValidEmail(peerName)
-                  ? this.genGravatar(peerName)
-                  : this.genAvatarSvg(peerName, 32);
+                    ? this.genGravatar(peerName)
+                    : this.genAvatarSvg(peerName, 32);
         avatar === 'left' ? (this.leftMsgAvatar = avatarImg) : (this.rightMsgAvatar = avatarImg);
     }
 
@@ -5234,7 +5233,7 @@ class RoomClient {
     isHtml(str) {
         const a = document.createElement('div');
         a.innerHTML = str;
-        for (var c = a.childNodes, i = c.length; i--; ) {
+        for (var c = a.childNodes, i = c.length; i--;) {
             if (c[i].nodeType == 1) return true;
         }
         return false;
@@ -6329,7 +6328,7 @@ class RoomClient {
 
     handleLocalRecordingStop() {
         console.log('MediaRecorder Blobs: ', recordedBlobs);
-    
+
         const dateTime = getDataTimeString();
         const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
         const blob = new Blob(recordedBlobs, { type: 'video/' + type });
@@ -6350,34 +6349,60 @@ class RoomClient {
         <br/>
         `;
         const recordingMsg = `Please wait to be processed, then will be downloaded to your ${currentDevice} device.`;
-    
+
         this.saveLastRecordingInfo(recordingInfo);
         this.showRecordingInfo(recType, recordingInfo, recordingMsg);
-    
+
         // Create FormData to send as multipart/form-data
         const formData = new FormData();
         formData.append('video', blob, recFileName);  // Append the video file and its name to FormData
-    
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get("room");
+        const name = urlParams.get("name");
+
         // Call the upload API
         fetch('http://localhost:3010/upload-video', {
             method: 'POST',
             body: formData,  // Send the FormData as the request body
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.fileUrl) {
-                console.log('Video uploaded successfully! File URL:', data.fileUrl);
-                // You can handle the file URL here, like displaying it in the UI or saving it
-                alert('Video uploaded successfully! File URL');
-            } else {
-                console.error('Error uploading video:', data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error uploading video:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.fileUrl) {
+                    console.log('Video uploaded successfully! File URL:', data.fileUrl);
+                    // You can handle the file URL here, like displaying it in the UI or saving it
+                    fetch('http://localhost:3010/api/v1/user/save-recording', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            roomId: roomId,
+                            url: data.fileUrl,
+                            fileName: recFileName,
+                            size: blobFileSize,
+                            codecs: recCodecs,
+                            device: currentDevice,
+                            storedType: recType,
+                            duration: recTime?.innerText || "",  // If available
+                        }),
+                    })
+                        .then(res => res.json())
+                        .then(saveRes => {
+                            console.log('Recording saved with metadata:', saveRes);
+                        })
+                        .catch(err => {
+                            console.error('Error saving recording to user:', err);
+                        });
+                    alert('Video uploaded successfully! File URL');
+                } else {
+                    console.error('Error uploading video:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading video:', error);
+            });
     }
-    
+
 
     handleServerRecordingStop() {
         console.log('MediaRecorder Stop');
@@ -7366,10 +7391,10 @@ class RoomClient {
                 active
                     ? this.userLog('info', `${icons.chat} Chat will be shown, when you receive a message`, 'top-end')
                     : this.userLog(
-                          'info',
-                          `${icons.chat} Chat not will be shown, when you receive a message`,
-                          'top-end',
-                      );
+                        'info',
+                        `${icons.chat} Chat not will be shown, when you receive a message`,
+                        'top-end',
+                    );
                 break;
             case 'speechMessages':
                 this.userLog('info', `${icons.speech} Speech incoming messages ${status}`, 'top-end');
@@ -7377,15 +7402,15 @@ class RoomClient {
             case 'transcriptShowOnMsg':
                 active
                     ? this.userLog(
-                          'info',
-                          `${icons.transcript} Transcript will be shown, when you receive a message`,
-                          'top-end',
-                      )
+                        'info',
+                        `${icons.transcript} Transcript will be shown, when you receive a message`,
+                        'top-end',
+                    )
                     : this.userLog(
-                          'info',
-                          `${icons.transcript} Transcript not will be shown, when you receive a message`,
-                          'top-end',
-                      );
+                        'info',
+                        `${icons.transcript} Transcript not will be shown, when you receive a message`,
+                        'top-end',
+                    );
                 break;
             case 'video_start_privacy':
                 this.userLog(
@@ -7488,8 +7513,8 @@ class RoomClient {
                         peer_avatar && this.isImageURL(peer_avatar)
                             ? peer_avatar
                             : this.isValidEmail(peer_name)
-                              ? this.genGravatar(peer_name, 32)
-                              : this.genAvatarSvg(peer_name, 32);
+                                ? this.genGravatar(peer_name, 32)
+                                : this.genAvatarSvg(peer_name, 32);
 
                     let lobbyTb = this.getId('lobbyTb');
                     let lobbyAccept = _PEER.acceptPeer;
@@ -7814,23 +7839,23 @@ class RoomClient {
 
 
     limitExceeded() {
-    this.sound('alert');
-    Swal.fire({
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showDenyButton: false,
-        showConfirmButton: true,
-        background: swalBackground,
-        imageUrl: image.warning, // Use a relevant image/icon
-        title: 'Room Full',
-        text: 'The room has reached the maximum participant limit.',
-        confirmButtonText: `Ok`,
-        showClass: { popup: 'animate__animated animate__fadeInDown' },
-        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-    }).then(() => {
-        this.exit();
-    });
-}
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showDenyButton: false,
+            showConfirmButton: true,
+            background: swalBackground,
+            imageUrl: image.warning, // Use a relevant image/icon
+            title: 'Room Full',
+            text: 'The room has reached the maximum participant limit.',
+            confirmButtonText: `Ok`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then(() => {
+            this.exit();
+        });
+    }
 
 
 
@@ -8419,9 +8444,8 @@ class RoomClient {
             switch (action) {
                 case 'ban':
                     if (peerActionAllowed) {
-                        const message = `Will ban you from the room${
-                            msg ? `<br><br><span class="red">Reason: ${msg}</span>` : ''
-                        }`;
+                        const message = `Will ban you from the room${msg ? `<br><br><span class="red">Reason: ${msg}</span>` : ''
+                            }`;
                         this.exit(true);
                         this.sound(action);
                         this.peerActionProgress(from_peer_name, message, 5000, action);
@@ -8429,9 +8453,8 @@ class RoomClient {
                     break;
                 case 'eject':
                     if (peerActionAllowed) {
-                        const message = `Will eject you from the room${
-                            msg ? `<br><br><span class="red">Reason: ${msg}</span>` : ''
-                        }`;
+                        const message = `Will eject you from the room${msg ? `<br><br><span class="red">Reason: ${msg}</span>` : ''
+                            }`;
                         this.exit(true);
                         this.sound(action);
                         this.peerActionProgress(from_peer_name, message, 5000, action);
