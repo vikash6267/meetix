@@ -8,7 +8,8 @@ import { toast } from "react-toastify";
 const {
    ADD_UPCOMING_MEETING_API,
    DELETE_SCHEDULE_MEETING,
-   GET_SCHEDULE_MEETING
+   GET_SCHEDULE_MEETING,
+   GET_MEETINGS_ACTIVITY
 } = userEndpoints;
 
 export const addUpcomingMeeting = async (userId, data, token) => {
@@ -64,6 +65,27 @@ export const getUpcomingMeetings = async (userId, token) => {
     });
 
     meetings = response?.data?.upCommingMeetings || [];
+    toast.success("Upcoming meetings fetched");
+  } catch (error) {
+    console.error("Fetch Meetings Error:", error);
+    toast.error(error?.response?.data?.message || "Failed to fetch meetings");
+  }
+
+  toast.dismiss(toastId);
+  return meetings;
+};
+
+
+export const getActivityMeetings = async (userId, token) => {
+  const toastId = toast.loading("Fetching upcoming meetings...");
+  let meetings = [];
+
+  try {
+    const response = await apiConnector("GET", `${GET_MEETINGS_ACTIVITY}/${userId}`, null, {
+      Authorization: `Bearer ${token}`,
+    });
+
+    meetings = response?.data || [];
     toast.success("Upcoming meetings fetched");
   } catch (error) {
     console.error("Fetch Meetings Error:", error);

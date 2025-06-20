@@ -142,4 +142,89 @@ router.get("/recordings/:userId", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+
+
+router.post('/messagePush', async (req, res) => {
+  const {
+    room_id,
+    peer_name,
+    peer_id,
+    to_peer_id,
+    to_peer_name,
+    peer_msg
+  } = req.body;
+console.log("req.body",req.body)
+  try {
+    // Find all users who joined this room
+    const users = await User.find({ 'meetings.roomId': room_id });
+
+    if (!users.length) return res.status(404).json({ message: 'No users found in this room' });
+
+    // Message object
+    const messageObj = {
+      peer_name,
+      peer_id,
+      to_peer_id,
+      to_peer_name,
+      peer_msg,
+      timestamp: new Date()
+    };
+
+    // For each user, add message to roomActivity
+    const updates = users.map(async user => {
+      const existingRoom = user.roomActivity.find(r => r.roomId === room_id);
+
+      if (existingRoom) {
+        existingRoom.messages.push(messageObj);
+      } else {
+        user.roomActivity.push({
+          roomId: room_id,
+          messages: [messageObj]
+        });
+      }
+
+      await user.save();
+    });
+
+    await Promise.all(updates);
+
+    res.status(200).json({ message: 'Message pushed to all users in the room.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+
+
+
+
+
+router.get('/room-activity/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findById(userId).select('roomActivity');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Room activity fetched successfully',
+      roomActivity: user.roomActivity
+    });
+  } catch (error) {
+    console.error('Error fetching room activity:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching room activity'
+    });
+  }
+});
 module.exports = router;

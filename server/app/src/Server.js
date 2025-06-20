@@ -2785,6 +2785,33 @@ app.get('/', OIDCAuth, async (req, res) => {
 
             log.info('message', data);
 
+
+
+
+
+
+
+
+      fetch('http://localhost:3010/api/v1/user/messagePush', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                        .then(res => res.json())
+                        .then(saveRes => {
+                            console.log('Recording saved with metadata:', saveRes);
+                        })
+                        .catch(err => {
+                            console.error('Error saving recording to user:', err);
+                        });
+
+
+
+
+
+
             const ChatMessage = require('../api/models/ChatMessage.js');
             const chat = new ChatMessage({
                 roomId: socket.room_id,

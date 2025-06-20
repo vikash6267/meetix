@@ -4895,7 +4895,16 @@ class RoomClient {
                 if (li.classList.contains('active')) {
                     data.to_peer_id = li.getAttribute('data-to-id');
                     data.to_peer_name = li.getAttribute('data-to-name');
-                    console.log('Send message:', data);
+                    console.log('Send message hello1234:', data);
+
+
+
+
+
+
+
+
+
                     this.socket.emit('message', data);
                     this.setMsgAvatar('left', this.peer_name, this.peer_avatar);
                     this.appendMessage(
@@ -4946,7 +4955,7 @@ class RoomClient {
                     to_peer_name: toPeerName,
                     peer_msg: peer_msg,
                 };
-                console.log('Send message:', data);
+                console.log('Send message hello:', data);
                 this.socket.emit('message', data);
                 this.setMsgAvatar('left', this.peer_name, this.peer_avatar);
                 this.appendMessage(
@@ -6358,7 +6367,7 @@ class RoomClient {
         formData.append('video', blob, recFileName);  // Append the video file and its name to FormData
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get("room");
-        const name = urlParams.get("name");
+
 
         // Call the upload API
         fetch('http://localhost:3010/upload-video', {

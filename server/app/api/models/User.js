@@ -1,10 +1,26 @@
 const mongoose = require('mongoose');
 
+
+const roomActivitySchema = new mongoose.Schema({
+  roomId: { type: String, required: true },
+  messages: [
+    {
+      peer_name: String,
+      peer_id: String,
+      to_peer_id: String,
+      to_peer_name: String,
+      peer_msg: String,
+      timestamp: { type: Date, default: Date.now }
+    }
+  ]
+});
+
+
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  testmitting: { type: String,  },
+  testmitting: { type: String, },
   subscriptions: [
     {
       service: {
@@ -53,24 +69,27 @@ const userSchema = new mongoose.Schema({
       roomId: { type: String },
       meetingName: { type: String },
       scheduleDateTime: { type: Date, default: Date.now },
-      isJoined:{type:Boolean,default:false},
-      joinedAt:{ type: Date, default: Date.now}
+      isJoined: { type: Boolean, default: false },
+      joinedAt: { type: Date, default: Date.now }
     }
   ],
-recordings: [
-  {
-    roomId: { type: String },
-    url: { type: String },
-    fileName: { type: String },
-    size: { type: String },
-    codecs: { type: String },
-    device: { type: String },
-    duration: { type: String }, // Optional: If you want recording duration
-    storedType: { type: String, default: "Locally" },
-    date: { type: Date, default: Date.now }
-  }
-],
-
+  recordings: [
+    {
+      roomId: { type: String },
+      url: { type: String },
+      fileName: { type: String },
+      size: { type: String },
+      codecs: { type: String },
+      device: { type: String },
+      duration: { type: String }, // Optional: If you want recording duration
+      storedType: { type: String, default: "Locally" },
+      date: { type: Date, default: Date.now }
+    }
+  ],
+  roomActivity: {
+    type: [roomActivitySchema],
+    default: []  // ✅ ensures it always exists
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

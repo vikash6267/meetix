@@ -29,10 +29,10 @@ async function checkUserSubscriptionLimits(userId) {
 
     switch (subscriptionType) {
       case "pro":
-        limit =3
+        limit =10
         break
       case "business":
-        limit = 5
+        limit = 200
         break
       default:
         limit = 2
