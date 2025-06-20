@@ -123,9 +123,8 @@ const createSubscription = async (req, res) => {
       description,
       rate,
       totalAmount,
-     
-      paymentDetails,
-    } = req.body;
+      limit
+      } = req.body;
 
     const startDate = new Date();
     const endDate = new Date();
@@ -136,7 +135,7 @@ const createSubscription = async (req, res) => {
       description,
       rate,
    totalAmount,
-      paymentDetails,
+   limit,
       startDate,
       endDate,
       isActive: true,
@@ -146,6 +145,39 @@ const createSubscription = async (req, res) => {
   } catch (error) {
     console.error("Create Subscription Error:", error);
     res.status(500).json({ success: false, message: "Failed to create subscription" });
+  }
+};
+const editSubscription = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      type,
+      description,
+      rate,
+      totalAmount,
+      limit
+    } = req.body;
+console.log("first")
+    const updatedSubscription = await subscriptionModel.findByIdAndUpdate(
+      id,
+      {
+        type,
+        description,
+        rate,
+        totalAmount,
+        limit
+      },
+      { new: true } // returns the updated document
+    );
+
+    if (!updatedSubscription) {
+      return res.status(404).json({ success: false, message: "Subscription not found" });
+    }
+
+    res.status(200).json({ success: true, subscription: updatedSubscription });
+  } catch (error) {
+    console.error("Edit Subscription Error:", error);
+    res.status(500).json({ success: false, message: "Failed to update subscription" });
   }
 };
 
@@ -254,5 +286,6 @@ module.exports = {
     getAllSubscriptions,
     getUserSubscriptionsCtrl,
     addMeetingToUser,
-    getAllUsers
+    getAllUsers,
+    editSubscription
  }

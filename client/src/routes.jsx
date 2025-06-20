@@ -39,6 +39,7 @@ import BookDemo from './pages/BookDemoPage/BookDemoPage';
 import SessionPage from './components/SessionPage/SessionPage';
 import User from './pages/Admin/User';
 import SubscriptionDashboard from './pages/Admin/Subscription';
+import MeetingDetails from './pages/Meeting/MeetingDetails';
 
 export const router = createBrowserRouter([
   // { path: '/', element: <IntroductionPage /> },
@@ -58,7 +59,8 @@ export const router = createBrowserRouter([
   { path: '/meetings/new', element: <NewMeetingPage /> },
   { path: '/meetings/upcoming', element: <UpcomingMeetingPage /> },
   { path: '/meetings/completed', element: <CompletedMeetingPage /> },
-  { path: '/dashboard/subscription-plans', element: <SubscripationPage /> },
+  { path: '/meetings/details', element: <MeetingDetails /> },
+  { path: '/subscription/plan', element: <SubscripationPage /> },
   { path: '/developers/documentation', element: <DeveloperDocumentationPage /> },
   { path: '/developers/generate-key', element: <ApiGeneratePage /> },
   { path: '/developers/integration-guide', element: <IntegrationGuidePage /> },

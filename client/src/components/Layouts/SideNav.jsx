@@ -34,6 +34,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isAdminExpanded, setIsAdminExpanded] = useState(
   location.pathname.startsWith('/admin')
 );
+  const [isSubsExpanded, setIsSubsExpanded] = useState(
+  location.pathname.startsWith('/admin')
+);
 
 
 const storedUser = localStorage.getItem('user');
@@ -65,7 +68,7 @@ const user = storedUser ? JSON.parse(storedUser) : null;
       {/* Navigation Links */}
       <ul className="space-y-2">
         {/* Landing Page */}
-        {/* <li>
+        <li>
           <Link
             to="/"
             className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${location.pathname === '/'
@@ -79,7 +82,7 @@ const user = storedUser ? JSON.parse(storedUser) : null;
             </div>
             {location.pathname === '/' && <FaChevronRight className="text-sm opacity-70" />}
           </Link>
-        </li> */}
+        </li>
 
         {/* Dashboard Pages (shown after login) */}
         <li className="pt-4 mt-4 border-t border-[#2F4F29]">
@@ -96,7 +99,7 @@ const user = storedUser ? JSON.parse(storedUser) : null;
           >
             <div className="flex items-center">
               <FaChartLine className="mr-3 text-teal-300" />
-              <span>Plans & Analysis</span>
+              <span>View Records</span>
             </div>
             <FaChevronRight
               className={`text-sm opacity-70 transition-transform ${isAnalysisExpanded ? 'transform rotate-90' : ''}`}
@@ -107,7 +110,20 @@ const user = storedUser ? JSON.parse(storedUser) : null;
         {/* Analysis Submenu */}
         {isAnalysisExpanded && (
           <ul className="pl-6 mt-1 space-y-1">
+
             <li>
+              <Link
+                to="/meetings/details"
+                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/meetings/details'
+                    ? 'bg-teal-800 text-white font-medium'
+                    : 'text-white hover:bg-[#2F4F29] '
+                  }`}
+              >
+                <FaUserCheck className="mr-2 text-xs" />
+                <span>View Meetings</span>
+              </Link>
+            </li>
+            {/* <li>
               <Link
                 to="/dashboard/attendance"
                 className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/dashboard/attendance'
@@ -130,7 +146,7 @@ const user = storedUser ? JSON.parse(storedUser) : null;
                 <FaUserCheck className="mr-2 text-xs" />
                 <span>Chat Messages</span>
               </Link>
-            </li>
+            </li> */}
             {/* <li>
               <Link
                 to="/dashboard/session"
@@ -143,18 +159,7 @@ const user = storedUser ? JSON.parse(storedUser) : null;
                 <span>Sessions</span>
               </Link>
             </li> */}
-            <li>
-              <Link
-                to="/dashboard/subscription-plans"
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/dashboard/subscription-plans'
-                    ? 'bg-teal-800 text-white font-medium'
-                    : 'text-white hover:bg-[#2F4F29]'
-                  }`}
-              >
-                <FaKey className="mr-2 text-xs" />
-                <span>Subscription Plans</span>
-              </Link>
-            </li>
+           
           </ul>
         )}
 
@@ -182,7 +187,7 @@ const user = storedUser ? JSON.parse(storedUser) : null;
           <ul className="pl-6 mt-1 space-y-1">
             <li>
               <Link
-                to={`https://meetix.mahitechnocrafts.in?id=${user?._id}`}
+                to={`http://localhost:3010?id=${user?._id}`}
                 target='_blank'
                 className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/meetings/new'
                     ? 'bg-teal-800 text-white font-medium'
@@ -205,7 +210,7 @@ const user = storedUser ? JSON.parse(storedUser) : null;
                 <span>Upcoming</span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link
                 to="/meetings/completed"
                 className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/meetings/completed'
@@ -228,10 +233,50 @@ const user = storedUser ? JSON.parse(storedUser) : null;
                 <FaFileDownload className="mr-2 text-xs" />
                 <span>Recordings</span>
               </Link>
-            </li>
+            </li> */}
           </ul>
         )}
 
+  <li>
+      <div
+        onClick={() => setIsSubsExpanded(!isSubsExpanded)}
+        className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
+          location.pathname.startsWith('/subscription')
+            ? 'bg-[#2F4F29] shadow-lg'
+            : 'hover:bg-[#2F4F29] hover:shadow-md hover:pl-4'
+        }`}
+      >
+        <div className="flex items-center">
+          <FaUserCheck className="mr-3 text-teal-300" />
+          <span>Subscription</span>
+        </div>
+        <FaChevronRight
+          className={`text-sm opacity-70 transition-transform ${
+            isAdminExpanded ? 'transform rotate-90' : ''
+          }`}
+        />
+      </div>
+    </li>
+
+    {isSubsExpanded && (
+      <ul className="pl-6 mt-1 space-y-1">
+        <li>
+          <Link
+            to="/subscription/plan"
+            className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+              location.pathname === '/subscription/plan'
+                ? 'bg-teal-800 text-white font-medium'
+                : 'text-white hover:bg-[#2F4F29]'
+            }`}
+          >
+            <FaUserCheck className="mr-2 text-xs" />
+            <span>Subscription Plan</span>
+          </Link>
+        </li>
+      
+       
+      </ul>
+    )}
         <li className="pt-4 mt-4 border-t border-[#2F4F29]">
           <span className="text-xs font-semibold text-white uppercase tracking-wider pl-3">Developers</span>
         </li>

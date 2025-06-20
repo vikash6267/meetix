@@ -5,6 +5,8 @@ const {
   getUpcomingMeetings,
   updateUpcomingMeeting,
   deleteUpcomingMeeting,
+  getRoomDetails,
+  getUserMeetingsDetails,
 } = require("../controllers/userCtrl");
 const User = require("../models/User");
 
@@ -19,6 +21,11 @@ router.put("/:userId/upcoming-meetings/:meetingId", updateUpcomingMeeting);
 
 // 🔹 Delete a meeting
 router.delete("/delete/:userId/:meetingId", deleteUpcomingMeeting);
+
+
+
+router.get('/room-details/:roomId', getRoomDetails);
+router.get('/user-meetings/:userId', getUserMeetingsDetails);
 
 
 

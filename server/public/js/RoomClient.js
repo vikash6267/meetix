@@ -6365,27 +6365,27 @@ class RoomClient {
         // Create FormData to send as multipart/form-data
         const formData = new FormData();
         formData.append('video', blob, recFileName);  // Append the video file and its name to FormData
-         let roomId = null;
+        let roomId = null;
 
-    // 1. Try to get from query param ?room=
-    const urlParams = new URLSearchParams(window.location.search);
-    roomId = urlParams.get("room");
+        // 1. Try to get from query param ?room=
+        const urlParams = new URLSearchParams(window.location.search);
+        roomId = urlParams.get("room");
 
-    if (!roomId) {
-        // 2. Try to get from URL path (e.g., /join/mahitechnocrafts_room)
+        if (!roomId) {
+            // 2. Try to get from URL path (e.g., /join/mahitechnocrafts_room)
 
-        const pathSegments = window.location.pathname.split("/");
+            const pathSegments = window.location.pathname.split("/");
 
-        // This gets the segment directly after 'join'
-        const joinIndex = pathSegments.findIndex((seg) => seg === "join");
-         roomId = joinIndex !== -1 && pathSegments.length > joinIndex + 1
-            ? pathSegments[joinIndex + 1]
-            : null;
-    }
+            // This gets the segment directly after 'join'
+            const joinIndex = pathSegments.findIndex((seg) => seg === "join");
+            roomId = joinIndex !== -1 && pathSegments.length > joinIndex + 1
+                ? pathSegments[joinIndex + 1]
+                : null;
+        }
 
 
         // Call the upload API
-        fetch('https://meetix.mahitechnocrafts.in/upload-video', {
+        fetch('http://localhost:3010/upload-video', {
             method: 'POST',
             body: formData,  // Send the FormData as the request body
         })
@@ -6394,7 +6394,7 @@ class RoomClient {
                 if (data.fileUrl) {
                     console.log('Video uploaded successfully! File URL:', data.fileUrl);
                     // You can handle the file URL here, like displaying it in the UI or saving it
-                    fetch('https://meetix.mahitechnocrafts.in/api/v1/user/save-recording', {
+                    fetch('http://localhost:3010/api/v1/user/save-recording', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

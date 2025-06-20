@@ -1,7 +1,7 @@
 
 // const BASE_URL = process.env.REACT_APP_BASE_URL;
 
-export const BASE_URL = "https://meetix.mahitechnocrafts.in/api/v1"
+export const BASE_URL = "http://localhost:3010/api/v1"
 
 
 
@@ -19,5 +19,10 @@ export const userEndpoints = {
   GET_SCHEDULE_MEETING: BASE_URL + "/user/getAll",
   DELETE_SCHEDULE_MEETING: BASE_URL + "/user/delete",
   GET_MEETINGS_ACTIVITY: BASE_URL + "/user/room-activity",
+  
+  
+  
+  GET_MEETINGS_DETAILS: BASE_URL + "/user/room-details",
+  GET_USER_MEETINGS: BASE_URL + "/user/user-meetings",
   
 }

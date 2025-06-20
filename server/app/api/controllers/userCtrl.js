@@ -1,4 +1,7 @@
 const User = require("../models/User");
+const Attendee = require('../models/Attendee');
+const Session = require('../models/Session');
+
 
 // 🔹 Add an upcoming meeting
 exports.addUpcomingMeeting = async (req, res) => {
@@ -87,5 +90,155 @@ exports.deleteUpcomingMeeting = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+exports.getRoomDetails = async (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    // 1. Get users with messages or recordings from the room
+    const users = await User.find({
+      $or: [
+        { 'roomActivity.roomId': roomId },
+        { 'recordings.roomId': roomId }
+      ]
+    });
+
+    let allMessages = [];
+    let allRecordings = [];
+
+    users.forEach(user => {
+      // Extract messages
+      if (user.roomActivity?.length > 0) {
+        user.roomActivity.forEach(activity => {
+          if (activity.roomId === roomId && activity.messages) {
+            allMessages.push(...activity.messages);
+          }
+        });
+      }
+
+      // Extract recordings
+      if (user.recordings?.length > 0) {
+        user.recordings.forEach(rec => {
+          if (rec.roomId === roomId) {
+            allRecordings.push(rec);
+          }
+        });
+      }
+    });
+
+    // 2. Get all attendees
+    const attendees = await Attendee.find({ roomId });
+
+    // 3. Get session info
+    const session = await Session.findOne({ sessionId: roomId });
+
+    return res.status(200).json({
+      success: true,
+      roomId,
+      messages: allMessages,
+      recordings: allRecordings,
+      attendees,
+      session
+    });
+  } catch (err) {
+    console.error('Error fetching room details:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: err.message
+    });
+  }
+};
+
+
+exports.getUserMeetingsDetails = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const meetingsData = [];
+
+    for (const meeting of user.meetings) {
+      const roomId = meeting.roomId;
+
+      // 1. Get all messages for roomId
+      const usersWithRoom = await User.find({ 'roomActivity.roomId': roomId });
+      let allMessages = [];
+      usersWithRoom.forEach(u => {
+        u.roomActivity.forEach(activity => {
+          if (activity.roomId === roomId && activity.messages?.length) {
+            allMessages.push(...activity.messages);
+          }
+        });
+      });
+
+      const messageCount = allMessages.length;
+
+      // 2. Extract unique peerNames from messages
+      const messagePeerNames = new Set(
+        allMessages.map(msg => msg.peer_name).filter(Boolean)
+      );
+
+      // 3. Get attendees whose peerName exists in messages
+      const allAttendees = await Attendee.find({ roomId });
+      const filteredAttendees = allAttendees.filter(att =>
+        messagePeerNames.has(att.peerName)
+      );
+      const uniqueAttendeeNames = new Set(
+        filteredAttendees.map(att => att.peerName)
+      );
+      const attendeeCount = uniqueAttendeeNames.size;
+
+      // 4. Get sessions with hostName that exists in messages
+      const allSessions = await Session.find({ sessionId: roomId });
+      const filteredSessions = allSessions.filter(session =>
+        messagePeerNames.has(session.hostName)
+      );
+      const uniqueSessionHostNames = new Set(
+        filteredSessions.map(s => s.hostName)
+      );
+      const sessionCount = uniqueSessionHostNames.size;
+
+      // 5. Get recording count
+      const allUsersWithRecordings = await User.find({ 'recordings.roomId': roomId });
+      let recordingCount = 0;
+      allUsersWithRecordings.forEach(u => {
+        u.recordings.forEach(rec => {
+          if (rec.roomId === roomId) {
+            recordingCount++;
+          }
+        });
+      });
+
+      meetingsData.push({
+        roomId,
+        joinedAt: meeting.joinedAt,
+        messageCount,
+        attendeeCount,
+        sessionCount,
+        recordingCount
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      userId,
+      totalMeetings: user.meetings.length,
+      meetings: meetingsData
+    });
+
+  } catch (err) {
+    console.error('Error fetching meeting data:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: err.message
+    });
   }
 };

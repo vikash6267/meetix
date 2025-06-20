@@ -32,7 +32,7 @@ const AttendancePage = () => {
     setError('');
     
     try {
-      const response = await fetch(`https://meetix.mahitechnocrafts.in/attendees/${roomId}`);
+      const response = await fetch(`http://localhost:3010/attendees/${roomId}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch attendance data');

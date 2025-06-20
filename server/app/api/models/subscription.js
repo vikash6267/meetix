@@ -20,6 +20,11 @@ const subscriptionsSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    limit: {
+      type: Number,
+      required: true,
+      default:0
+    },
     totalAmount: {
       type: String,
       required: true,

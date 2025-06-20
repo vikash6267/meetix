@@ -21,7 +21,7 @@ const SubscripationPage = () => {
     const fetchSubscriptions = async () => {
       try {
         const { data } = await axios.post(
-          "https://meetix.mahitechnocrafts.in/api/v1/subscription/my-subscriptions",
+          "http://localhost:3010/api/v1/subscription/my-subscriptions",
           {},
           {
             headers: {
@@ -91,7 +91,7 @@ const SubscripationPage = () => {
 
                         <div className="text-right">
                           <p className="text-blue-600 font-semibold text-xl">
-                            ₹{sub?.payable ?? '0'} / month
+                            ${sub?.payable ?? '0'} / month
                           </p>
                         </div>
                       </div>
@@ -119,12 +119,16 @@ const SubscripationPage = () => {
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => toast.info("Renew feature coming soon.")}
-                        className="mt-6 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-md transition"
-                      >
-                        Renew Plan
-                      </button>
+                   {isExpired && (
+  <button
+    onClick={() => toast.info("Renew feature coming soon.")}
+    className="mt-6 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-md transition"
+  >
+    Renew Plan
+  </button>
+)}
+
+
                     </div>
                   );
                 })}
