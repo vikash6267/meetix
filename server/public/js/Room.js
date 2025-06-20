@@ -435,7 +435,7 @@ async function refreshMainButtonsToolTipPlacement() {
 
         // This gets the segment directly after 'join'
         const joinIndex = pathSegments.findIndex((seg) => seg === "join");
-        const roomId = joinIndex !== -1 && pathSegments.length > joinIndex + 1
+         roomId = joinIndex !== -1 && pathSegments.length > joinIndex + 1
             ? pathSegments[joinIndex + 1]
             : null;
     }
