@@ -426,8 +426,8 @@ async function refreshMainButtonsToolTipPlacement() {
     const name = urlParams.get("name");
 
     let isSubscription = false;
-
-    if (roomId ) {
+console.log("ENTER THE BUTTON SECTION")
+    if (roomId) {
       try {
         const response = await fetch("https://meetix.mahitechnocrafts.in/api/v1/user/testmeeting", {
           method: "POST",
