@@ -421,13 +421,13 @@ function initClient() {
 
 
 async function refreshMainButtonsToolTipPlacement() {
- 
-   const urlParams = new URLSearchParams(window.location.search);
+ const urlParams = new URLSearchParams(window.location.search);
     const roomId = urlParams.get("room");
- 
+    const name = urlParams.get("name");
+
     let isSubscription = false;
 
-    if (roomId) {
+    if (roomId ) {
       try {
         const response = await fetch("https://meetix.mahitechnocrafts.in/api/v1/user/testmeeting", {
           method: "POST",
@@ -441,17 +441,22 @@ async function refreshMainButtonsToolTipPlacement() {
         });
         
         const result = await response.json();
-        console.log(result)
+        console.log("result",result)
         isSubscription = result.isSubscription === true;
       } catch (error) {
         console.error("Error checking subscription:", error);
       }
     }
 
-      // 🔒 Show or hide recording buttons based on subscription
+    if (!isMobileDevice) {
+   
+
+    // 🔒 Show or hide recording buttons based on subscription
     const startRecBtn = document.getElementById("startRecButton");
     const stopRecBtn = document.getElementById("stopRecButton");
-  
+    const aboutButton2 = document.getElementById("aboutButton");
+
+    if (aboutButton2) aboutButton2.style.display = "none";
     if (!isSubscription) {
       if (startRecBtn) startRecBtn.style.display = "none";
       if (stopRecBtn) stopRecBtn.style.display = "none";
@@ -459,13 +464,7 @@ async function refreshMainButtonsToolTipPlacement() {
       if (startRecBtn) startRecBtn.style.display = "";
       if (stopRecBtn) stopRecBtn.style.display = "";
     }
-    if (!isMobileDevice) {
-  
 
-  
-  const aboutButton2 = document.getElementById("aboutButton");
-
-    if (aboutButton2) aboutButton2.style.display = "none";
     // ✅ Tooltip placement
     const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value;
     const placement = position == 'vertical' ? 'right' : 'top';
@@ -2069,7 +2068,7 @@ function handleButtons() {
     };
 toggleExtraButton.onclick = async () => {
    
-refreshMainButtonsToolTipPlacement()
+
     toggleExtraButtons();
     if (!isMobileDevice) {
         isToggleExtraBtnClicked = true;
@@ -2083,7 +2082,6 @@ refreshMainButtonsToolTipPlacement()
         if (isToggleExtraBtnClicked || isMobileDevice) return;
         if (control.style.display === 'none') {
             toggleExtraButtons();
-            refreshMainButtonsToolTipPlacement()
         }
     };
     startAudioButton.onclick = async () => {
@@ -3727,7 +3725,7 @@ function toggleExtraButtons() {
     const isControlHidden = control.style.display === 'none' || control.style.display === '';
     const displayValue = isControlHidden ? 'flex' : 'none';
     const iconHtml = isControlHidden ? icons.up : icons.down;
-refreshMainButtonsToolTipPlacement()
+
     elemDisplay('control', isControlHidden, displayValue);
     toggleExtraButton.innerHTML = iconHtml;
     hideClassElements('videoMenuBar');
