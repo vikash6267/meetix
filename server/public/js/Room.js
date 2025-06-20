@@ -421,8 +421,8 @@ function initClient() {
 
 
 async function refreshMainButtonsToolTipPlacement() {
-  if (!isMobileDevice) {
-    const urlParams = new URLSearchParams(window.location.search);
+ 
+   const urlParams = new URLSearchParams(window.location.search);
     const roomId = urlParams.get("room");
     const name = urlParams.get("name");
 
@@ -440,19 +440,23 @@ async function refreshMainButtonsToolTipPlacement() {
             testmittingValue: "name",
           }),
         });
-        console.log(response)
-
+        
         const result = await response.json();
+        console.log(result)
         isSubscription = result.isSubscription === true;
       } catch (error) {
         console.error("Error checking subscription:", error);
       }
     }
+    if (!isMobileDevice) {
+  
 
     // 🔒 Show or hide recording buttons based on subscription
     const startRecBtn = document.getElementById("startRecButton");
     const stopRecBtn = document.getElementById("stopRecButton");
+    const aboutButton2 = document.getElementById("aboutButton");
 
+    if (aboutButton2) aboutButton2.style.display = "none";
     if (!isSubscription) {
       if (startRecBtn) startRecBtn.style.display = "none";
       if (stopRecBtn) stopRecBtn.style.display = "none";
