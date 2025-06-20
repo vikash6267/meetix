@@ -6365,8 +6365,23 @@ class RoomClient {
         // Create FormData to send as multipart/form-data
         const formData = new FormData();
         formData.append('video', blob, recFileName);  // Append the video file and its name to FormData
-        const urlParams = new URLSearchParams(window.location.search);
-        const roomId = urlParams.get("room");
+         let roomId = null;
+
+    // 1. Try to get from query param ?room=
+    const urlParams = new URLSearchParams(window.location.search);
+    roomId = urlParams.get("room");
+
+    if (!roomId) {
+        // 2. Try to get from URL path (e.g., /join/mahitechnocrafts_room)
+
+        const pathSegments = window.location.pathname.split("/");
+
+        // This gets the segment directly after 'join'
+        const joinIndex = pathSegments.findIndex((seg) => seg === "join");
+        const roomId = joinIndex !== -1 && pathSegments.length > joinIndex + 1
+            ? pathSegments[joinIndex + 1]
+            : null;
+    }
 
 
         // Call the upload API

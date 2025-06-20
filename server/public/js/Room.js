@@ -421,91 +421,106 @@ function initClient() {
 
 
 async function refreshMainButtonsToolTipPlacement() {
- const urlParams = new URLSearchParams(window.location.search);
-    const roomId = urlParams.get("room");
-    const name = urlParams.get("name");
 
- // 🔒 Show or hide recording buttons based on subscription
+    let roomId = null;
+
+    // 1. Try to get from query param ?room=
+    const urlParams = new URLSearchParams(window.location.search);
+    roomId = urlParams.get("room");
+
+    if (!roomId) {
+        // 2. Try to get from URL path (e.g., /join/mahitechnocrafts_room)
+
+        const pathSegments = window.location.pathname.split("/");
+
+        // This gets the segment directly after 'join'
+        const joinIndex = pathSegments.findIndex((seg) => seg === "join");
+        const roomId = joinIndex !== -1 && pathSegments.length > joinIndex + 1
+            ? pathSegments[joinIndex + 1]
+            : null;
+    }
+
+    // 🔒 Show or hide recording buttons based on subscription
     const startRecBtn = document.getElementById("startRecButton");
     const stopRecBtn = document.getElementById("stopRecButton");
 
-   
+
 
 
     let isSubscription = false;
-console.log("ENTER THE BUTTON SECTION",roomId)
+    console.log("ENTER THE BUTTON SECTION", roomId)
     if (roomId) {
-      try {
-        const response = await fetch("https://meetix.mahitechnocrafts.in/api/v1/user/testmeeting", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            roomId: roomId,
-            testmittingValue: "name",
-          }),
-        });
-        
-        const result = await response.json();
-        console.log("result",result)
-        isSubscription = result.isSubscription === true;
-      } catch (error) {
-        console.error("Error checking subscription:", error);
-      }
+        try {
+            const response = await fetch("https://meetix.mahitechnocrafts.in/api/v1/user/testmeeting", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    roomId: roomId,
+                    testmittingValue: "name",
+                }),
+            });
+
+            const result = await response.json();
+            console.log("result", result)
+            isSubscription = result.isSubscription === true;
+        } catch (error) {
+            console.error("Error checking subscription:", error);
+        }
     }
 
-       if (!isSubscription) {
-      if (startRecBtn) startRecBtn.style.display = "none";
-      if (stopRecBtn) stopRecBtn.style.display = "none";
+    if (!isSubscription) {
+        if (startRecBtn) startRecBtn.style.display = "none";
+        if (stopRecBtn) stopRecBtn.style.display = "none";
     } else {
-      if (startRecBtn) startRecBtn.style.display = "";
-      if (stopRecBtn) stopRecBtn.style.display = "";
+        if (startRecBtn) startRecBtn.style.display = "";
+        if (stopRecBtn) stopRecBtn.style.display = "";
     }
 
     if (!isMobileDevice) {
-   
 
-   
-    const aboutButton2 = document.getElementById("aboutButton");
 
-    if (aboutButton2) aboutButton2.style.display = "none";
-  
 
-    // ✅ Tooltip placement
-    const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value;
-    const placement = position == 'vertical' ? 'right' : 'top';
-    const bPlacement = position == 'vertical' ? 'top' : 'right';
+        const aboutButton2 = document.getElementById("aboutButton");
 
-    setTippy('shareButton', 'Share room', placement);
-    setTippy('hideMeButton', 'Toggle hide self view', placement);
-    setTippy('startRecButton', 'Start recording', placement);
-    setTippy('stopRecButton', 'Stop recording', placement);
-    setTippy('fullScreenButton', 'Toggle full screen', placement);
-    setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
-    setTippy('pollButton', 'Toggle the poll', placement);
-    setTippy('editorButton', 'Toggle the editor', placement);
-    setTippy('transcriptionButton', 'Toggle transcription', placement);
-    setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
-    setTippy('documentPiPButton', 'Toggle Document picture in picture', placement);
-    setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
-    setTippy('restartICEButton', 'Restart ICE', placement);
-    setTippy('aboutButton', 'About this project', placement);
+        if (aboutButton2) aboutButton2.style.display = "none";
 
-    setTippy('toggleExtraButton', 'Toggle extra buttons', bPlacement);
-    setTippy('startAudioButton', 'Start the audio', bPlacement);
-    setTippy('stopAudioButton', 'Stop the audio', bPlacement);
-    setTippy('startVideoButton', 'Start the video', bPlacement);
-    setTippy('stopVideoButton', 'Stop the video', bPlacement);
-    setTippy('swapCameraButton', 'Swap the camera', bPlacement);
-    setTippy('startScreenButton', 'Start screen share', bPlacement);
-    setTippy('stopScreenButton', 'Stop screen share', bPlacement);
-    setTippy('raiseHandButton', 'Raise your hand', bPlacement);
-    setTippy('lowerHandButton', 'Lower your hand', bPlacement);
-    setTippy('chatButton', 'Toggle the chat', bPlacement);
-    setTippy('settingsButton', 'Toggle the settings', bPlacement);
-    setTippy('exitButton', 'Leave room', bPlacement);
-  }
+
+        // ✅ Tooltip placement
+        const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value;
+        const placement = position == 'vertical' ? 'right' : 'top';
+        const bPlacement = position == 'vertical' ? 'top' : 'right';
+
+        setTippy('shareButton', 'Share room', placement);
+        setTippy('hideMeButton', 'Toggle hide self view', placement);
+        setTippy('startRecButton', 'Start recording', placement);
+        setTippy('stopRecButton', 'Stop recording', placement);
+        setTippy('fullScreenButton', 'Toggle full screen', placement);
+        setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
+        setTippy('pollButton', 'Toggle the poll', placement);
+        setTippy('editorButton', 'Toggle the editor', placement);
+        setTippy('transcriptionButton', 'Toggle transcription', placement);
+        setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
+        setTippy('documentPiPButton', 'Toggle Document picture in picture', placement);
+        setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
+        setTippy('restartICEButton', 'Restart ICE', placement);
+        setTippy('aboutButton', 'About this project', placement);
+
+        setTippy('toggleExtraButton', 'Toggle extra buttons', bPlacement);
+        setTippy('startAudioButton', 'Start the audio', bPlacement);
+        setTippy('stopAudioButton', 'Stop the audio', bPlacement);
+        setTippy('startVideoButton', 'Start the video', bPlacement);
+        setTippy('stopVideoButton', 'Stop the video', bPlacement);
+        setTippy('swapCameraButton', 'Swap the camera', bPlacement);
+        setTippy('startScreenButton', 'Start screen share', bPlacement);
+        setTippy('stopScreenButton', 'Stop screen share', bPlacement);
+        setTippy('raiseHandButton', 'Raise your hand', bPlacement);
+        setTippy('lowerHandButton', 'Lower your hand', bPlacement);
+        setTippy('chatButton', 'Toggle the chat', bPlacement);
+        setTippy('settingsButton', 'Toggle the settings', bPlacement);
+        setTippy('exitButton', 'Leave room', bPlacement);
+    }
 }
 
 
@@ -1271,8 +1286,8 @@ function handleVideo() {
     elemDisplay('imageGrid', false);
 
     isVideoAllowed &&
-    isMediaStreamTrackAndTransformerSupported &&
-    (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
+        isMediaStreamTrackAndTransformerSupported &&
+        (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
         ? show(initVirtualBackgroundButton)
         : hide(initVirtualBackgroundButton);
 }
@@ -1304,8 +1319,8 @@ async function handleAudioVideo() {
     elemDisplay('imageGrid', false);
 
     isVideoAllowed &&
-    isMediaStreamTrackAndTransformerSupported &&
-    (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
+        isMediaStreamTrackAndTransformerSupported &&
+        (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
         ? show(initVirtualBackgroundButton)
         : hide(initVirtualBackgroundButton);
 }
@@ -2073,21 +2088,19 @@ function handleButtons() {
     lowerHandButton.onclick = () => {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
     };
-toggleExtraButton.onclick = async () => {
-   refreshMainButtonsToolTipPlacement();
+    toggleExtraButton.onclick = async () => {
 
-    toggleExtraButtons();
-    if (!isMobileDevice) {
-        isToggleExtraBtnClicked = true;
-        setTimeout(() => {
-            isToggleExtraBtnClicked = false;
-        }, 2000);
-    }
-};
+
+        toggleExtraButtons();
+        if (!isMobileDevice) {
+            isToggleExtraBtnClicked = true;
+            setTimeout(() => {
+                isToggleExtraBtnClicked = false;
+            }, 2000);
+        }
+    };
 
     toggleExtraButton.onmouseover = () => {
-   refreshMainButtonsToolTipPlacement();
-
         if (isToggleExtraBtnClicked || isMobileDevice) return;
         if (control.style.display === 'none') {
             toggleExtraButtons();
@@ -3853,7 +3866,7 @@ function getCookie(cName) {
 function isHtml(str) {
     var a = document.createElement('div');
     a.innerHTML = str;
-    for (var c = a.childNodes, i = c.length; i--; ) {
+    for (var c = a.childNodes, i = c.length; i--;) {
         if (c[i].nodeType == 1) return true;
     }
     return false;
@@ -5198,7 +5211,7 @@ function showImageSelector() {
                     initImageUrlInput.value = clipboardText;
                 }
             })
-            .catch(() => {});
+            .catch(() => { });
     }
 
     initSaveImageUrlBtn.addEventListener('click', async () => {
@@ -5411,10 +5424,9 @@ function showAbout() {
         html: `
             <br />
             <div id="about">
-                ${
-                    BRAND.about?.html && BRAND.about.html.trim() !== ''
-                        ? BRAND.about.html
-                        : `
+                ${BRAND.about?.html && BRAND.about.html.trim() !== ''
+                ? BRAND.about.html
+                : `
                             <button 
                                 id="support-button" 
                                 data-umami-event="Support button" 
@@ -5443,7 +5455,7 @@ function showAbout() {
                             <span>&copy; 2025 MiroTalk SFU, all rights reserved</span>
                             <hr />
                         `
-                }
+            }
             </div>
         `,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
