@@ -429,13 +429,7 @@ async function refreshMainButtonsToolTipPlacement() {
     const startRecBtn = document.getElementById("startRecButton");
     const stopRecBtn = document.getElementById("stopRecButton");
 
-      if (!isSubscription) {
-      if (startRecBtn) startRecBtn.style.display = "none";
-      if (stopRecBtn) stopRecBtn.style.display = "none";
-    } else {
-      if (startRecBtn) startRecBtn.style.display = "";
-      if (stopRecBtn) stopRecBtn.style.display = "";
-    }
+   
 
 
     let isSubscription = false;
@@ -459,6 +453,14 @@ console.log("ENTER THE BUTTON SECTION")
       } catch (error) {
         console.error("Error checking subscription:", error);
       }
+    }
+
+       if (!isSubscription) {
+      if (startRecBtn) startRecBtn.style.display = "none";
+      if (stopRecBtn) stopRecBtn.style.display = "none";
+    } else {
+      if (startRecBtn) startRecBtn.style.display = "";
+      if (stopRecBtn) stopRecBtn.style.display = "";
     }
 
     if (!isMobileDevice) {
