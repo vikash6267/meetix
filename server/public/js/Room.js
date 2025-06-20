@@ -425,6 +425,19 @@ async function refreshMainButtonsToolTipPlacement() {
     const roomId = urlParams.get("room");
     const name = urlParams.get("name");
 
+ // 🔒 Show or hide recording buttons based on subscription
+    const startRecBtn = document.getElementById("startRecButton");
+    const stopRecBtn = document.getElementById("stopRecButton");
+
+      if (!isSubscription) {
+      if (startRecBtn) startRecBtn.style.display = "none";
+      if (stopRecBtn) stopRecBtn.style.display = "none";
+    } else {
+      if (startRecBtn) startRecBtn.style.display = "";
+      if (stopRecBtn) stopRecBtn.style.display = "";
+    }
+
+
     let isSubscription = false;
 console.log("ENTER THE BUTTON SECTION")
     if (roomId) {
@@ -451,19 +464,11 @@ console.log("ENTER THE BUTTON SECTION")
     if (!isMobileDevice) {
    
 
-    // 🔒 Show or hide recording buttons based on subscription
-    const startRecBtn = document.getElementById("startRecButton");
-    const stopRecBtn = document.getElementById("stopRecButton");
+   
     const aboutButton2 = document.getElementById("aboutButton");
 
     if (aboutButton2) aboutButton2.style.display = "none";
-    if (!isSubscription) {
-      if (startRecBtn) startRecBtn.style.display = "none";
-      if (stopRecBtn) stopRecBtn.style.display = "none";
-    } else {
-      if (startRecBtn) startRecBtn.style.display = "";
-      if (stopRecBtn) stopRecBtn.style.display = "";
-    }
+  
 
     // ✅ Tooltip placement
     const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value;
