@@ -2074,7 +2074,7 @@ function handleButtons() {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
     };
 toggleExtraButton.onclick = async () => {
-   
+   refreshMainButtonsToolTipPlacement();
 
     toggleExtraButtons();
     if (!isMobileDevice) {
@@ -2086,6 +2086,8 @@ toggleExtraButton.onclick = async () => {
 };
 
     toggleExtraButton.onmouseover = () => {
+   refreshMainButtonsToolTipPlacement();
+
         if (isToggleExtraBtnClicked || isMobileDevice) return;
         if (control.style.display === 'none') {
             toggleExtraButtons();
