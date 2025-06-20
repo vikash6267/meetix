@@ -612,7 +612,7 @@ const SignUp = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:3010/register",
+        "https://meetix.mahitechnocrafts.in/register",
         {
           method: "POST",
           headers: {

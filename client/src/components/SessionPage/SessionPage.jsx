@@ -31,7 +31,7 @@ const SessionPage = () => {
     setError('');
     
     try {
-      const response = await fetch(`http://localhost:3010/session/${sessionId}`);
+      const response = await fetch(`https://meetix.mahitechnocrafts.in/session/${sessionId}`);
       if (!response.ok) throw new Error('Session not found');
       
       const data = await response.json();

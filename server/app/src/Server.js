@@ -699,8 +699,8 @@ app.get('/', OIDCAuth, async (req, res) => {
       // ✅ Safe to add meeting to user
       await addMeetingToUser(userId, roomId);
     }
-            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:30
-            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token
+            // https://meetix.mahitechnocrafts.in/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:30
+            // https://meetix.mahitechnocrafts.in/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token
 
             const { room, roomPassword, name, audio, video, screen, hide, notify, duration, token, isPresenter } =
                 checkXSS(req.query);
@@ -793,7 +793,7 @@ app.get('/', OIDCAuth, async (req, res) => {
         return res.redirect('/');
     });
 
-    // http://localhost:3010/attendees/:roomID
+    // https://meetix.mahitechnocrafts.in/attendees/:roomID
     //To get the attendees
     app.get('/attendees/:roomId', async (req, res) => {
         const attendees = await Attendee.find({ roomId: req.params.roomId });
@@ -2792,7 +2792,7 @@ app.get('/', OIDCAuth, async (req, res) => {
 
 
 
-      fetch('http://localhost:3010/api/v1/user/messagePush', {
+      fetch('https://meetix.mahitechnocrafts.in/api/v1/user/messagePush', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

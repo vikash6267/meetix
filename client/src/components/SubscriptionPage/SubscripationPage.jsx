@@ -21,7 +21,7 @@ const SubscripationPage = () => {
     const fetchSubscriptions = async () => {
       try {
         const { data } = await axios.post(
-          "http://localhost:3010/api/v1/subscription/my-subscriptions",
+          "https://meetix.mahitechnocrafts.in/api/v1/subscription/my-subscriptions",
           {},
           {
             headers: {
