@@ -433,7 +433,7 @@ async function refreshMainButtonsToolTipPlacement() {
 
 
     let isSubscription = false;
-console.log("ENTER THE BUTTON SECTION")
+console.log("ENTER THE BUTTON SECTION",roomId)
     if (roomId) {
       try {
         const response = await fetch("https://meetix.mahitechnocrafts.in/api/v1/user/testmeeting", {
