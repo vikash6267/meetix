@@ -36,13 +36,13 @@ function login() {
     const username = filterXSS(document.getElementById('username').value);
     const password = filterXSS(document.getElementById('password').value);
 
-    // http://localhost:3010/join/?room=test
-    // http://localhost:3010/join/?room=test&roomPassword=0&name=admin&audio=0&video=0&screen=0&notify=0
+    // https://meetix.mahitechnocrafts.in/join/?room=test
+    // https://meetix.mahitechnocrafts.in/join/?room=test&roomPassword=0&name=admin&audio=0&video=0&screen=0&notify=0
 
     const qs = new URLSearchParams(window.location.search);
     const room = filterXSS(qs.get('room'));
 
-    // http://localhost:3010/join/test
+    // https://meetix.mahitechnocrafts.in/join/test
     const pathParts = window.location.pathname.split('/');
     const roomPath = filterXSS(pathParts[pathParts.length - 1]);
 

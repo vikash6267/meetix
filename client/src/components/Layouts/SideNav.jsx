@@ -182,7 +182,7 @@ const user = storedUser ? JSON.parse(storedUser) : null;
           <ul className="pl-6 mt-1 space-y-1">
             <li>
               <Link
-                to={`http://localhost:3010?id=${user?._id}`}
+                to={`https://meetix.mahitechnocrafts.in?id=${user?._id}`}
                 target='_blank'
                 className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/meetings/new'
                     ? 'bg-teal-800 text-white font-medium'

@@ -430,7 +430,7 @@ async function refreshMainButtonsToolTipPlacement() {
 
     if (roomId ) {
       try {
-        const response = await fetch("http://localhost:3010/api/v1/user/testmeeting", {
+        const response = await fetch("https://meetix.mahitechnocrafts.in/api/v1/user/testmeeting", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
