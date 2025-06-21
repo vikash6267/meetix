@@ -23,6 +23,10 @@ const LandingPageHeader = () => {
     const [isMeetDropdownOpen, setIsMeetDropdownOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+      const storedUser = localStorage.getItem("user")
+  const user = storedUser ? JSON.parse(storedUser) : null
+
     useEffect(() => {
         dispatch(actions.setIsRoomHost(false));
         // socketConnection.connetWithSocket();
@@ -49,7 +53,7 @@ const LandingPageHeader = () => {
             navigate("/login");  // Redirect to login page
             return;
         }
-        window.location.href = "https://meetix.mahitechnocrafts.in";  // Redirect to meeting URL
+        window.location.href = `https://meetix.mahitechnocrafts.in?id=${user?._id}`;  // Redirect to meeting URL
     };
 
     // const handleJoinRoom = () => {
@@ -107,13 +111,13 @@ const LandingPageHeader = () => {
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center space-x-4">
                 <div className="relative">
-                    <button
+                   { <button
                         onClick={() => setIsMeetDropdownOpen(!isMeetDropdownOpen)}
                         className="flex items-center text-white hover:text-blue-600 font-medium"
                     >
                         Meet
                         <ChevronDownIcon className="h-4 w-4 ml-1" />
-                    </button>
+                    </button>}
                     {isMeetDropdownOpen && (
                         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
                             <div className="px-4 py-2">
@@ -156,7 +160,7 @@ const LandingPageHeader = () => {
                 )}
                 {isLoggedIn && (
                     <Link
-                        to={'/dashboard/attendance'}
+                        to={'/meetings/details'}
                         className="bg-[#00FF40] hover:bg-[#00FF40] text-black px-4 py-2 rounded-3xl font-bold"
                     >
                         Go to Dashboard
@@ -211,7 +215,7 @@ const LandingPageHeader = () => {
                     )}
                     {isLoggedIn && (
                         <Link
-                            to={'/dashboard/attendance'}
+                            to={'/meetings/details'}
                             className="bg-[#00FF40] hover:bg-[#00FF40] text-white px-4 py-2 rounded-md font-medium text-center"
                         >
                             Go to Dashboard

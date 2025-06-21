@@ -268,7 +268,7 @@ const SignIn = () => {
         // localStorage.setItem('name', data.name);
         // localStorage.setItem('userId', data.userId);
         // setIsLoggedIn(true);
-        navigate('/dashboard/attendance');
+        navigate('/meetings/details');
       }
     } catch (err) {
       setError('Failed to connect to the server. Please try again later.');
