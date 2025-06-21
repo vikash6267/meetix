@@ -111,6 +111,7 @@ const User = require('../api/models/User.js');
 const bcrypt = require('bcrypt');
 const ChatMessage = require('../api/models/ChatMessage.js');
 const cookieParser = require('cookie-parser');
+const AWS = require('aws-sdk');
 
 require('dotenv').config();
 const mongoUri = process.env.MONGO_STRING;
@@ -120,6 +121,14 @@ const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
 const containerName = process.env.AZURE_BLOB_CONTAINER;
 const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
 const containerClient = blobServiceClient.getContainerClient(containerName);
+
+// AWS 
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
+
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -868,40 +877,40 @@ app.get('/', OIDCAuth, async (req, res) => {
     });
 
     // To upload the vedio recording on azure
-    app.post('/upload-video', upload.single('video'), async (req, res) => {
-        try {
-            if (!req.file) {
-                return res.status(400).send('No video file uploaded.');
-            }
+ app.post('/upload-video', upload.single('video'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).send('No video file uploaded.');
+    }
 
-            const fileName = req.file.originalname; // Get the original file name
-            const fileExtension = path.extname(fileName).toLowerCase();
+    const fileName = req.file.originalname;
+    const fileExtension = path.extname(fileName).toLowerCase();
 
-            // Ensure file is a valid video format (including .webm)
-            const validExtensions = ['.mp4', '.mkv', '.avi', '.mov', '.webm'];
-            if (!validExtensions.includes(fileExtension)) {
-                return res.status(400).send('Invalid file type. Please upload a video file.');
-            }
+    // Validate file extension
+    const validExtensions = ['.mp4', '.mkv', '.avi', '.mov', '.webm'];
+    if (!validExtensions.includes(fileExtension)) {
+      return res.status(400).send('Invalid file type. Please upload a video file.');
+    }
 
-            // Get a blob client to interact with the Azure container
-            const blobClient = containerClient.getBlockBlobClient(fileName);
+    const params = {
+      Bucket: process.env.AWS_S3_BUCKET,
+      Key: `videos/${fileName}`,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    //   ACL: 'public-read', // Optional: makes the video publicly accessible
+    };
 
-            // Upload the video file to Azure Blob Storage
-            const uploadBlobResponse = await blobClient.uploadData(req.file.buffer, {
-                blobHTTPHeaders: { blobContentType: req.file.mimetype },
-            });
+    const uploadResult = await s3.upload(params).promise();
 
-            // Respond with success and file URL
-            const fileUrl = blobClient.url;
-            res.status(200).json({
-                message: 'Video uploaded successfully!',
-                fileUrl: fileUrl,
-            });
-        } catch (error) {
-            console.error(error);
-            res.status(500).send('An error occurred while uploading the video.');
-        }
+    res.status(200).json({
+      message: 'Video uploaded successfully!',
+      fileUrl: uploadResult.Location,
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while uploading the video.');
+  }
+});
 
     // Endpoint to get list of video recordings
     // Endpoint to get list of video recordings with additional properties
