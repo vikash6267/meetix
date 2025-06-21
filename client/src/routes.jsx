@@ -40,6 +40,7 @@ import SessionPage from './components/SessionPage/SessionPage';
 import User from './pages/Admin/User';
 import SubscriptionDashboard from './pages/Admin/Subscription';
 import MeetingDetails from './pages/Meeting/MeetingDetails';
+import PrivateRoute from './components/routes/PrivateRoute';
 
 export const router = createBrowserRouter([
   // { path: '/', element: <IntroductionPage /> },
@@ -50,20 +51,73 @@ export const router = createBrowserRouter([
   { path: '/sign-up', element: <SignUp /> },
   // { path: '/dashboard', element: <DashboardPage /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
-  { path: '/meetings/recordings', element: <RecordingsPage /> },
-  { path: '/dashboard/attendance', element: <AttendancePage /> },
-  { path: '/dashboard/chat-messages', element: <ChatPage /> },
-  // { path: '/dashboard/session', element: <SessionPage /> },
-  { path: '/admin/users', element: <User /> },
-  { path: '/admin/subs', element: <SubscriptionDashboard /> },
-  { path: '/meetings/new', element: <NewMeetingPage /> },
-  { path: '/meetings/upcoming', element: <UpcomingMeetingPage /> },
-  { path: '/meetings/completed', element: <CompletedMeetingPage /> },
-  { path: '/meetings/details', element: <MeetingDetails /> },
-  { path: '/subscription/plan', element: <SubscripationPage /> },
-  { path: '/developers/documentation', element: <DeveloperDocumentationPage /> },
-  { path: '/developers/generate-key', element: <ApiGeneratePage /> },
-  { path: '/developers/integration-guide', element: <IntegrationGuidePage /> },
+ { path: '/meetings/recordings', element: 
+  <PrivateRoute>
+    <RecordingsPage />
+  </PrivateRoute>
+},
+{ path: '/dashboard/attendance', element: 
+  <PrivateRoute>
+    <AttendancePage />
+  </PrivateRoute>
+},
+{ path: '/dashboard/chat-messages', element: 
+  <PrivateRoute>
+    <ChatPage />
+  </PrivateRoute>
+},
+// { path: '/dashboard/session', element: <PrivateRoute><SessionPage /></PrivateRoute> },
+{ path: '/admin/users', element: 
+  <PrivateRoute>
+    <User />
+  </PrivateRoute>
+},
+{ path: '/admin/subs', element: 
+  <PrivateRoute>
+    <SubscriptionDashboard />
+  </PrivateRoute>
+},
+{ path: '/meetings/new', element: 
+  <PrivateRoute>
+    <NewMeetingPage />
+  </PrivateRoute>
+},
+{ path: '/meetings/upcoming', element: 
+  <PrivateRoute>
+    <UpcomingMeetingPage />
+  </PrivateRoute>
+},
+{ path: '/meetings/completed', element: 
+  <PrivateRoute>
+    <CompletedMeetingPage />
+  </PrivateRoute>
+},
+{ path: '/meetings/details', element: 
+  <PrivateRoute>
+    <MeetingDetails />
+  </PrivateRoute>
+},
+{ path: '/subscription/plan', element: 
+  <PrivateRoute>
+    <SubscripationPage />
+  </PrivateRoute>
+},
+{ path: '/developers/documentation', element: 
+  <PrivateRoute>
+    <DeveloperDocumentationPage />
+  </PrivateRoute>
+},
+{ path: '/developers/generate-key', element: 
+  <PrivateRoute>
+    <ApiGeneratePage />
+  </PrivateRoute>
+},
+{ path: '/developers/integration-guide', element: 
+  <PrivateRoute>
+    <IntegrationGuidePage />
+  </PrivateRoute>
+}
+,
   { path: '/screen-sharing', element: <ScreenSharing /> },
   { path: '/recordings-page', element: <RecordingsPage /> },
   { path: '/virtual-background', element: <VirtualBackground /> },
