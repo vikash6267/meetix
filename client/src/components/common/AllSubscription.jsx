@@ -70,7 +70,7 @@ const AllSubscriptions = () => {
   };
 
  const handleSubscribe = async (subscriptionId, email) => {
-  const res = await axios.post("http://localhost:3010/api/v1/subscription/create", {
+  const res = await axios.post("https://meetix.mahitechnocrafts.in/api/v1/subscription/create", {
     subscriptionId: subscriptionId._id,
     redirectUrl: `https://meet.mahitechnocrafts.in/payment-success?subscriptionId=${subscriptionId}`,
     metadata: { email:user.email },

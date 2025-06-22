@@ -41,6 +41,7 @@ import User from './pages/Admin/User';
 import SubscriptionDashboard from './pages/Admin/Subscription';
 import MeetingDetails from './pages/Meeting/MeetingDetails';
 import PrivateRoute from './components/routes/PrivateRoute';
+import PaymentSuccess from './components/Subscription/Paymentsuccess';
 
 export const router = createBrowserRouter([
   // { path: '/', element: <IntroductionPage /> },
@@ -116,8 +117,8 @@ export const router = createBrowserRouter([
   <PrivateRoute>
     <IntegrationGuidePage />
   </PrivateRoute>
-}
-,
+},
+{ path: '/payment-success', element: <PaymentSuccess /> },
   { path: '/screen-sharing', element: <ScreenSharing /> },
   { path: '/recordings-page', element: <RecordingsPage /> },
   { path: '/virtual-background', element: <VirtualBackground /> },
