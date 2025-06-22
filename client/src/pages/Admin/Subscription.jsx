@@ -29,6 +29,7 @@ const SubscriptionDashboard = () => {
     limit: "",
     isActive: true,
     startDate: "",
+    whopPlanId: "",
     endDate: "",
   })
 
@@ -58,6 +59,7 @@ const SubscriptionDashboard = () => {
       limit: "",
       isActive: true,
       startDate: "",
+      whopPlanId:"",
       endDate: "",
     })
     setFormErrors({})
@@ -69,6 +71,7 @@ const SubscriptionDashboard = () => {
     setFormData({
       type: subscription.type,
       description: subscription.description,
+      whopPlanId: subscription?.whopPlanId || '',
       rate: subscription.rate.toString(),
       totalAmount: subscription.totalAmount.toString(),
       limit: subscription.limit.toString(),
@@ -91,6 +94,7 @@ const SubscriptionDashboard = () => {
       rate: "",
       totalAmount: "",
       limit: "",
+      whopPlanId:"",
       isActive: true,
       startDate: "",
       endDate: "",
@@ -119,6 +123,7 @@ const SubscriptionDashboard = () => {
 
     if (!formData.type.trim()) errors.type = "Plan type is required"
     if (!formData.description.trim()) errors.description = "Description is required"
+    if (!formData.whopPlanId.trim()) errors.description = "Whop Id is required"
     // if (!formData.rate || Number.parseFloat(formData.rate) < 0) errors.rate = "Valid rate is required"
     if (!formData.totalAmount || Number.parseFloat(formData.totalAmount) < 0)
       errors.totalAmount = "Valid total amount is required"
@@ -660,7 +665,21 @@ const SubscriptionDashboard = () => {
                   {formErrors.limit && <p className="text-red-500 text-sm mt-1">{formErrors.limit}</p>}
                 </div>
 
-               
+                    <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Limit (Per Meeting) *</label>
+                  <input
+                   
+                    name="whopPlanId"
+                    value={formData.whopPlanId}
+                    onChange={handleInputChange}
+                  
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      formErrors.whopPlanId ? "border-red-500" : "border-gray-300"
+                    }`}
+                    placeholder="0"
+                  />
+                  {formErrors.whopPlanId && <p className="text-red-500 text-sm mt-1">{formErrors.whopPlanId}</p>}
+                </div>
               </div>
 
               {/* Description */}

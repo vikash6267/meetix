@@ -2,58 +2,70 @@ const subscriptionModel = require("../models/subscription")
 const crypto = require("crypto");
 const { razorpayInstance } = require("../config/ragorpay");
 const authModel = require("../models/User")
+const whopSdk = require("../config/whop");
 
 
 const createSubscriptionCtrl = async (req, res) => {
   try {
-    const { totalAmount } = req.body;
-    console.log("User ID:", req.user.id);
+    const { subscriptionId, metadata, redirectUrl } = req.body;
+console.log(req.body)
+    if (!subscriptionId || !redirectUrl) {
+      return res.status(400).json({ message: "Missing subscriptionId or redirectUrl" });
+    }
 
-    const options = {
-      amount: Math.round(totalAmount * 100), // ✅ Razorpay expects amount in paise (integer)
-      currency: "INR",
-      receipt: `order_rcptid_${Math.floor(Math.random() * 100000)}`,
-    };
+    // Get subscription with whopPlanId
+    const subscription = await subscriptionModel.findById(subscriptionId);
+    console.log(subscription)
+    if (!subscription || !subscription.whopPlanId) {
+      return res.status(404).json({ message: "Subscription or Whop Plan ID not found." });
+    }
 
-    const order = await razorpayInstance.orders.create(options);
-    res.status(200).json({ orderId: order.id });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "Error in creating order",
+    // Create checkout session
+    const session = await whopSdk.payments.createCheckoutSession({
+      planId: subscription.whopPlanId,
+      metadata,
+      redirectUrl,
     });
+
+    return res.status(200).json({
+      sessionId: session.id,
+      redirectUrl: `https://whop.com/checkout/${session.id}`,
+    });
+  } catch (error) {
+    console.error("Whop createCheckoutSession error:", error);
+    return res.status(500).json({ message: "Failed to create checkout session", error: error.message });
   }
 };
 
 
 
+
+
+
+
+
 const verifyPaymentCtrl = async (req, res) => {
   try {
-        console.log("REQ BODY:", req.body);
-
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderDetails } = req.body;
-    const { type, totalAmount, subscriptionId } = orderDetails;
+    const { license_id, subscriptionId } = req.body;
     const userId = req.user.id;
-console.log("first")
-    if (!type || !totalAmount || !subscriptionId) {
-      return res.status(400).json({ message: "Missing order details." });
-    }
 
-    const secret = process.env.RAZORPAY_SECRET;
-    const hmac = crypto.createHmac("sha256", secret);
-    hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
-    const generated_signature = hmac.digest("hex");
-
-    if (generated_signature !== razorpay_signature) {
-      return res.status(400).json({ message: "Payment verification failed." });
+    if (!license_id || !subscriptionId) {
+      return res.status(400).json({ message: "Missing license or subscription ID." });
     }
 
     const subscription = await subscriptionModel.findById(subscriptionId);
-    if (!subscription) return res.status(404).json({ message: "Subscription not found." });
+    if (!subscription) {
+      return res.status(404).json({ message: "Subscription not found." });
+    }
 
-    const enrollmentDate = new Date();
-    const expirationDate = new Date(subscription.endDate);
+    // Fetch license details from Whop
+    const license = await whop.license.retrieve(license_id);
+    if (!license || license.status !== "active") {
+      return res.status(400).json({ message: "Invalid or inactive license." });
+    }
+
+    const enrollmentDate = new Date(license.created_at);
+    const expirationDate = new Date(subscription.endDate); // You can use license.expires_at if available
 
     // Add to User
     await authModel.findByIdAndUpdate(userId, {
@@ -63,8 +75,8 @@ console.log("first")
           enrollmentDate,
           expirationDate,
           isActive: true,
-          transaction_id: razorpay_payment_id,
-          payable: totalAmount,
+          transaction_id: license.id,
+          payable: subscription.rate,
           expiryMail: 0,
         },
       },
@@ -77,14 +89,14 @@ console.log("first")
           user: userId,
           enrollmentDate,
           expirationDate,
-          transaction_id: razorpay_payment_id,
-          payable: totalAmount,
+          transaction_id: license.id,
+          payable: subscription.rate,
           expiryMail: 0,
         },
       },
     });
 
-    return res.status(200).json({ message: "Payment verified and subscription added." });
+    return res.status(200).json({ message: "License verified and subscription added." });
 
   } catch (error) {
     console.error("Error in verifyPaymentCtrl:", error.message);
@@ -123,7 +135,8 @@ const createSubscription = async (req, res) => {
       description,
       rate,
       totalAmount,
-      limit
+      limit,
+      whopPlanId
       } = req.body;
 
     const startDate = new Date();
@@ -138,6 +151,7 @@ const createSubscription = async (req, res) => {
    limit,
       startDate,
       endDate,
+      whopPlanId,
       isActive: true,
     });
 
@@ -155,7 +169,8 @@ const editSubscription = async (req, res) => {
       description,
       rate,
       totalAmount,
-      limit
+      limit,
+      whopPlanId
     } = req.body;
 console.log("first")
     const updatedSubscription = await subscriptionModel.findByIdAndUpdate(
@@ -165,7 +180,8 @@ console.log("first")
         description,
         rate,
         totalAmount,
-        limit
+        limit,
+        whopPlanId
       },
       { new: true } // returns the updated document
     );

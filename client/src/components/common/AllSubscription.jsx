@@ -7,6 +7,9 @@ const AllSubscriptions = () => {
   const [plans, setPlans] = useState([]);
   const [userSubscription, setUserSubscription] = useState(null);
   const token = localStorage.getItem('authToken');
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -66,22 +69,23 @@ const AllSubscriptions = () => {
     });
   };
 
-  const handleSubscribe = async (plan) => {
-    try {
-      const sdkLoaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
-      if (!sdkLoaded) {
-        toast.error("Failed to load Razorpay SDK.");
-        return;
-      }
+ const handleSubscribe = async (subscriptionId, email) => {
+  const res = await axios.post("http://localhost:3010/api/v1/subscription/create", {
+    subscriptionId: subscriptionId._id,
+    redirectUrl: `https://meet.mahitechnocrafts.in/payment-success?subscriptionId=${subscriptionId}`,
+    metadata: { email:user.email },
+  });
 
-      const orderId = await createOrder(plan.type, plan.rate, token);
-      const ver = await initiatePayment(plan.type, plan.rate, orderId, plan._id, token);
-      console.log("Payment success:", ver);
-    } catch (err) {
-      console.error("Subscription flow error:", err);
-      toast.error("Subscription failed.");
-    }
-  };
+  console.log(res);
+
+  if (res.data.redirectUrl) {
+    window.location.href = res.data.redirectUrl; // ✅ Redirect to Whop checkout
+  } else {
+    toast.error("Failed to start checkout");
+  }
+};
+
+
 
   const getButtonText = (plan) => {
     if (!userSubscription) return "Subscribe";
