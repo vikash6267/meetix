@@ -666,7 +666,7 @@ const SubscriptionDashboard = () => {
                 </div>
 
                     <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Limit (Per Meeting) *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Whop ID*</label>
                   <input
                    
                     name="whopPlanId"
