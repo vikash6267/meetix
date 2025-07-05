@@ -71,7 +71,7 @@ const commands = {
 };
 
 const browser = {
-    newroom: 'https://meet.mahitechnocrafts.in/meetings/details',
+    newroom: 'http://localhost:3010/meetings/details',
     email: 'mailto:?subject=&body=',
     google: 'https://www.google.com',
     googleTr: 'https://translate.google.com/',

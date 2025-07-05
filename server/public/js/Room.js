@@ -47,7 +47,7 @@ let survey = {
 
 let redirect = {
     enabled: true,
-    url: 'https://meet.mahitechnocrafts.in/meetings/details',
+    url: 'http://localhost:3010/meetings/details',
 };
 
 let recCodecs = null;
@@ -451,7 +451,7 @@ async function refreshMainButtonsToolTipPlacement() {
     console.log("ENTER THE BUTTON SECTION", roomId)
     if (roomId) {
         try {
-            const response = await fetch("https://meetix.mahitechnocrafts.in/api/v1/user/testmeeting", {
+            const response = await fetch("http://localhost:3010api/v1/user/testmeeting", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -3639,7 +3639,7 @@ function leaveFeedback() {
 }
 
 function redirectOnLeave() {
-    redirect && redirect.enabled ? openURL(redirect.url) : openURL('https://meet.mahitechnocrafts.in/meetings/details');
+    redirect && redirect.enabled ? openURL(redirect.url) : openURL('http://localhost:3010/meetings/details');
 }
 
 function userLog(icon, message, position, timer = 3000) {
