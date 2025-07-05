@@ -18,6 +18,7 @@ export const userEndpoints = {
   ADD_UPCOMING_MEETING_API : BASE_URL + "/user/create",
   GET_SCHEDULE_MEETING: BASE_URL + "/user/getAll",
   DELETE_SCHEDULE_MEETING: BASE_URL + "/user/delete",
+  UPDATE_SCHEDULE_MEETING: BASE_URL + "/user/upcoming-meetings",
   GET_MEETINGS_ACTIVITY: BASE_URL + "/user/room-activity",
   
   

@@ -1,24 +1,139 @@
 const User = require("../models/User");
 const Attendee = require('../models/Attendee');
 const Session = require('../models/Session');
+const mailSender = require("../helper/mailsender");
+const meetingTemplate = require("../helper/meetingTemplate");
 
 
 // 🔹 Add an upcoming meeting
 exports.addUpcomingMeeting = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { roomId, scheduleDateTime, isJoined, joinedAt,meetingName } = req.body;
+    const {
+      roomId,
+      meetingName,
+      scheduleDateTime,
+      isJoined,
+      joinedAt,
+      shortSummary,
+      participants,
+      isCancelled,
+    } = req.body;
 
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-    user.upCommingMeetings.push({ roomId,meetingName, scheduleDateTime, isJoined, joinedAt });
+    const newMeeting = {
+      roomId,
+      meetingName,
+      scheduleDateTime,
+      isJoined,
+      joinedAt,
+      shortSummary,
+      participants,
+      isCancelled,
+    };
+
+    user.upCommingMeetings.push(newMeeting);
     await user.save();
+const emailHTML = meetingTemplate({
+  type: "create",
+  meetingName,
+  scheduleDateTime,
+  shortSummary,
+  roomId,
+});
 
+// Send email to all participants
+for (let email of participants) {
+  await mailSender(email, "New Meeting Scheduled", emailHTML);
+}
     res.status(200).json({
       success: true,
       message: "Upcoming meeting added successfully",
       upCommingMeetings: user.upCommingMeetings,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
+
+
+// 🔹 Update a specific upcoming meeting
+exports.updateUpcomingMeeting = async (req, res) => {
+  try {
+    const { userId, meetingId } = req.params;
+    const {
+      roomId,
+      meetingName,
+      scheduleDateTime,
+      isJoined,
+      joinedAt,
+      shortSummary,
+      participants,
+      isCancelled,
+    } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const meeting = user.upCommingMeetings.id(meetingId);
+    if (!meeting) {
+      return res.status(404).json({ success: false, message: "Meeting not found" });
+    }
+
+    // Save old data for comparison
+    const oldMeeting = {
+      meetingName: meeting.meetingName,
+      scheduleDateTime: meeting.scheduleDateTime,
+      shortSummary: meeting.shortSummary,
+      isCancelled: meeting.isCancelled,
+    };
+
+    // Update only provided fields
+    if (roomId !== undefined) meeting.roomId = roomId;
+    if (meetingName !== undefined) meeting.meetingName = meetingName;
+    if (scheduleDateTime !== undefined) meeting.scheduleDateTime = scheduleDateTime;
+    if (isJoined !== undefined) meeting.isJoined = isJoined;
+    if (joinedAt !== undefined) meeting.joinedAt = joinedAt;
+    if (shortSummary !== undefined) meeting.shortSummary = shortSummary;
+    if (participants !== undefined) meeting.participants = participants;
+    if (isCancelled !== undefined) meeting.isCancelled = isCancelled;
+
+    await user.save();
+
+    // ✅ Compare relevant fields
+    const shouldSendEmail =
+      (meetingName && meetingName !== oldMeeting.meetingName) ||
+      (scheduleDateTime && scheduleDateTime !== oldMeeting.scheduleDateTime) ||
+      (shortSummary && shortSummary !== oldMeeting.shortSummary) ||
+      (typeof isCancelled === "boolean" && isCancelled !== oldMeeting.isCancelled);
+
+    if (shouldSendEmail) {
+      const emailHTML = meetingTemplate({
+        type: isCancelled ? "cancel" : "update",
+        meetingName: meeting.meetingName,
+        scheduleDateTime: meeting.scheduleDateTime,
+        shortSummary: meeting.shortSummary,
+        roomId: meeting.roomId,
+      });
+
+      const recipientList = meeting.participants || []; // fallback if not sent from frontend
+      for (let email of recipientList) {
+        await mailSender(email, isCancelled ? "Meeting Cancelled" : "Meeting Updated", emailHTML);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Meeting updated successfully",
+      updatedMeeting: meeting,
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -42,34 +157,6 @@ console.log(userId)
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
-// 🔹 Update a specific upcoming meeting
-exports.updateUpcomingMeeting = async (req, res) => {
-  try {
-    const { userId, meetingId } = req.params;
-    const { roomId, scheduleDateTime } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-    const meeting = user.upCommingMeetings.id(meetingId);
-    if (!meeting) return res.status(404).json({ success: false, message: "Meeting not found" });
-
-    if (roomId !== undefined) meeting.roomId = roomId;
-    if (scheduleDateTime !== undefined) meeting.scheduleDateTime = scheduleDateTime;
-
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Upcoming meeting updated successfully",
-      meeting,
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
 // 🔹 Delete a specific upcoming meeting
 exports.deleteUpcomingMeeting = async (req, res) => {
   try {

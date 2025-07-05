@@ -164,7 +164,7 @@ const options = {
 
 const corsOptions = {
     origin: config.server?.cors?.origin || '*',
-    methods: config.server?.cors?.methods || ['GET', 'POST'],
+    methods: "*",
 };
 
 const server = httpolyglot.createServer(options, app);

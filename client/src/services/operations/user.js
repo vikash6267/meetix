@@ -11,7 +11,8 @@ const {
    GET_SCHEDULE_MEETING,
    GET_MEETINGS_ACTIVITY,
    GET_MEETINGS_DETAILS,
-   GET_USER_MEETINGS
+   GET_USER_MEETINGS,
+   UPDATE_SCHEDULE_MEETING
 } = userEndpoints;
 
 export const addUpcomingMeeting = async (userId, data, token) => {
@@ -41,7 +42,7 @@ export const updateUpcomingMeeting = async (userId, meetingId, data, token) => {
   let result = false;
 
   try {
-    const response = await apiConnector("PUT", `${DELETE_SCHEDULE_MEETING}/${userId}/${meetingId}`, data, {
+    const response = await apiConnector("PUT", `${UPDATE_SCHEDULE_MEETING}/${userId}/${meetingId}`, data, {
       Authorization: `Bearer ${token}`,
     });
 

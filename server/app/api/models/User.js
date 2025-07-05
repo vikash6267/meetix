@@ -64,15 +64,20 @@ const userSchema = new mongoose.Schema({
       joinedAt: { type: Date, default: Date.now }
     }
   ],
-  upCommingMeetings: [
-    {
-      roomId: { type: String },
-      meetingName: { type: String },
-      scheduleDateTime: { type: Date, default: Date.now },
-      isJoined: { type: Boolean, default: false },
-      joinedAt: { type: Date, default: Date.now }
-    }
-  ],
+upCommingMeetings: [
+  {
+    roomId: { type: String },
+    meetingName: { type: String },
+    scheduleDateTime: { type: Date, default: Date.now },
+    isJoined: { type: Boolean, default: false },
+    joinedAt: { type: Date, default: Date.now },
+    shortSummary: { type: String },
+    participants: [{ type: String, match: /.+\@.+\..+/ }],
+    isCancelled: { type: Boolean, default: false } // ✅ NEW FIELD
+  }
+]
+
+  ,
   recordings: [
     {
       roomId: { type: String },

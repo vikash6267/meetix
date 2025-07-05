@@ -17,7 +17,7 @@ router.post("/create/:userId", addUpcomingMeeting);
 router.get("/getAll/:userId", getUpcomingMeetings);
 
 // 🔹 Update a meeting
-router.put("/:userId/upcoming-meetings/:meetingId", updateUpcomingMeeting);
+router.put("/upcoming-meetings/:userId/:meetingId", updateUpcomingMeeting);
 
 // 🔹 Delete a meeting
 router.delete("/delete/:userId/:meetingId", deleteUpcomingMeeting);
