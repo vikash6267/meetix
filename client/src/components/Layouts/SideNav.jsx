@@ -13,34 +13,44 @@ import {
   FaUserCheck,
   FaCode,
   FaKey,
-  FaBook
+  FaBook,
 } from 'react-icons/fa';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
   const [isMeetingsExpanded, setIsMeetingsExpanded] = useState(
-    location.pathname === '/meetings' || location.pathname.startsWith('/meetings/')
+    location.pathname === '/meetings' ||
+      location.pathname.startsWith('/meetings/'),
   );
 
   const [isAnalysisExpanded, setIsAnalysisExpanded] = useState(
-    location.pathname === '/dashboard' || location.pathname.startsWith('/dashboard/')
+    location.pathname === '/dashboard' ||
+      location.pathname.startsWith('/dashboard/'),
   );
 
   const [isDevelopersExpanded, setIsDevelopersExpanded] = useState(
-    location.pathname === '/developers' || location.pathname.startsWith('/developers/')
+    location.pathname === '/developers' ||
+      location.pathname.startsWith('/developers/'),
   );
 
   const [isAdminExpanded, setIsAdminExpanded] = useState(
-  location.pathname.startsWith('/admin')
-);
+    location.pathname.startsWith('/admin'),
+  );
   const [isSubsExpanded, setIsSubsExpanded] = useState(
-  location.pathname.startsWith('/admin')
-);
+    location.pathname.startsWith('/admin'),
+  );
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    // Clear all localStorage items
+    localStorage.clear();
 
-const storedUser = localStorage.getItem('user');
-const user = storedUser ? JSON.parse(storedUser) : null;
+    // Redirect to login page
+    navigate('/login');
+  };
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null;
   return (
     <div
       className={`fixed top-0 left-0 bg-gradient-to-t from-black to-[#2F4F29] text-white w-72 h-screen p-6 overflow-y-auto z-50 transform transition-all duration-300 ease-in-out shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 md:w-64 hide-scrollbar`}
@@ -71,31 +81,37 @@ const user = storedUser ? JSON.parse(storedUser) : null;
         <li>
           <Link
             to="/"
-            className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${location.pathname === '/'
+            className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
+              location.pathname === '/'
                 ? 'bg-[#2F4F29]       600 shadow-lg'
                 : 'hover:bg-[#2F4F29]       700 hover:shadow-md hover:pl-4'
-              }`}
+            }`}
           >
             <div className="flex items-center">
               <FaHome className="mr-3 text-teal-300" />
               <span>Home</span>
             </div>
-            {location.pathname === '/' && <FaChevronRight className="text-sm opacity-70" />}
+            {location.pathname === '/' && (
+              <FaChevronRight className="text-sm opacity-70" />
+            )}
           </Link>
         </li>
 
         {/* Dashboard Pages (shown after login) */}
         <li className="pt-4 mt-4 border-t border-[#2F4F29]">
-          <span className="text-xs font-semibold text-white uppercase tracking-wider pl-3">Dashboard</span>
+          <span className="text-xs font-semibold text-white uppercase tracking-wider pl-3">
+            Dashboard
+          </span>
         </li>
 
         <li>
           <div
             onClick={() => setIsAnalysisExpanded(!isAnalysisExpanded)}
-            className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${location.pathname.startsWith('/dashboard')
+            className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
+              location.pathname.startsWith('/dashboard')
                 ? 'bg-[#2F4F29]  shadow-lg'
                 : 'hover:bg-[#2F4F29]  hover:shadow-md hover:pl-4'
-              }`}
+            }`}
           >
             <div className="flex items-center">
               <FaChartLine className="mr-3 text-teal-300" />
@@ -110,14 +126,14 @@ const user = storedUser ? JSON.parse(storedUser) : null;
         {/* Analysis Submenu */}
         {isAnalysisExpanded && (
           <ul className="pl-6 mt-1 space-y-1">
-
             <li>
               <Link
                 to="/meetings/details"
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/meetings/details'
+                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+                  location.pathname === '/meetings/details'
                     ? 'bg-teal-800 text-white font-medium'
                     : 'text-white hover:bg-[#2F4F29] '
-                  }`}
+                }`}
               >
                 <FaUserCheck className="mr-2 text-xs" />
                 <span>View Meetings</span>
@@ -159,18 +175,18 @@ const user = storedUser ? JSON.parse(storedUser) : null;
                 <span>Sessions</span>
               </Link>
             </li> */}
-           
           </ul>
         )}
-
 
         <li>
           <div
             onClick={() => setIsMeetingsExpanded(!isMeetingsExpanded)}
-            className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${location.pathname === '/meetings' || location.pathname.startsWith('/meetings/')
+            className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
+              location.pathname === '/meetings' ||
+              location.pathname.startsWith('/meetings/')
                 ? 'bg-[#2F4F29]       600 shadow-lg'
                 : 'hover:bg-[#2F4F29]       700 hover:shadow-md hover:pl-4'
-              }`}
+            }`}
           >
             <div className="flex items-center">
               <FaCalendarAlt className="mr-3 text-teal-300" />
@@ -187,12 +203,13 @@ const user = storedUser ? JSON.parse(storedUser) : null;
           <ul className="pl-6 mt-1 space-y-1">
             <li>
               <Link
-                to={`http://localhost:3010?id=${user?._id}`}
-                target='_blank'
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/meetings/new'
+                to={`https://meetix.mahitechnocrafts.in?id=${user?._id}`}
+                target="_blank"
+                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+                  location.pathname === '/meetings/new'
                     ? 'bg-teal-800 text-white font-medium'
                     : 'text-white hover:bg-[#2F4F29]'
-                  }`}
+                }`}
               >
                 <FaPlusCircle className="mr-2 text-xs" />
                 <span>New Meeting</span>
@@ -201,10 +218,11 @@ const user = storedUser ? JSON.parse(storedUser) : null;
             <li>
               <Link
                 to="/meetings/upcoming"
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/meetings/upcoming'
+                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+                  location.pathname === '/meetings/upcoming'
                     ? 'bg-teal-800 text-white font-medium'
                     : 'text-white hover:bg-[#2F4F29]'
-                  }`}
+                }`}
               >
                 <FaCalendarAlt className="mr-2 text-xs" />
                 <span>Upcoming</span>
@@ -237,57 +255,58 @@ const user = storedUser ? JSON.parse(storedUser) : null;
           </ul>
         )}
 
-  <li>
-      <div
-        onClick={() => setIsSubsExpanded(!isSubsExpanded)}
-        className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
-          location.pathname.startsWith('/subscription')
-            ? 'bg-[#2F4F29] shadow-lg'
-            : 'hover:bg-[#2F4F29] hover:shadow-md hover:pl-4'
-        }`}
-      >
-        <div className="flex items-center">
-          <FaUserCheck className="mr-3 text-teal-300" />
-          <span>Subscription</span>
-        </div>
-        <FaChevronRight
-          className={`text-sm opacity-70 transition-transform ${
-            isAdminExpanded ? 'transform rotate-90' : ''
-          }`}
-        />
-      </div>
-    </li>
-
-    {isSubsExpanded && (
-      <ul className="pl-6 mt-1 space-y-1">
         <li>
-          <Link
-            to="/subscription/plan"
-            className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
-              location.pathname === '/subscription/plan'
-                ? 'bg-teal-800 text-white font-medium'
-                : 'text-white hover:bg-[#2F4F29]'
+          <div
+            onClick={() => setIsSubsExpanded(!isSubsExpanded)}
+            className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
+              location.pathname.startsWith('/subscription')
+                ? 'bg-[#2F4F29] shadow-lg'
+                : 'hover:bg-[#2F4F29] hover:shadow-md hover:pl-4'
             }`}
           >
-            <FaUserCheck className="mr-2 text-xs" />
-            <span>Subscription Plan</span>
-          </Link>
+            <div className="flex items-center">
+              <FaUserCheck className="mr-3 text-teal-300" />
+              <span>Subscription</span>
+            </div>
+            <FaChevronRight
+              className={`text-sm opacity-70 transition-transform ${
+                isAdminExpanded ? 'transform rotate-90' : ''
+              }`}
+            />
+          </div>
         </li>
-      
-       
-      </ul>
-    )}
+
+        {isSubsExpanded && (
+          <ul className="pl-6 mt-1 space-y-1">
+            <li>
+              <Link
+                to="/subscription/plan"
+                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+                  location.pathname === '/subscription/plan'
+                    ? 'bg-teal-800 text-white font-medium'
+                    : 'text-white hover:bg-[#2F4F29]'
+                }`}
+              >
+                <FaUserCheck className="mr-2 text-xs" />
+                <span>Subscription Plan</span>
+              </Link>
+            </li>
+          </ul>
+        )}
         <li className="pt-4 mt-4 border-t border-[#2F4F29]">
-          <span className="text-xs font-semibold text-white uppercase tracking-wider pl-3">Developers</span>
+          <span className="text-xs font-semibold text-white uppercase tracking-wider pl-3">
+            Developers
+          </span>
         </li>
 
         <li>
           <div
             onClick={() => setIsDevelopersExpanded(!isDevelopersExpanded)}
-            className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${location.pathname.startsWith('/developers')
+            className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
+              location.pathname.startsWith('/developers')
                 ? 'bg-[#2F4F29]       600 shadow-lg'
                 : 'hover:bg-[#2F4F29]       700 hover:shadow-md hover:pl-4'
-              }`}
+            }`}
           >
             <div className="flex items-center">
               <FaCode className="mr-3 text-teal-300" />
@@ -305,10 +324,11 @@ const user = storedUser ? JSON.parse(storedUser) : null;
             <li>
               <Link
                 to="/developers/documentation"
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/developers/documentation'
+                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+                  location.pathname === '/developers/documentation'
                     ? 'bg-teal-800 text-white font-medium'
                     : 'text-white hover:bg-[#2F4F29]'
-                  }`}
+                }`}
               >
                 <FaBook className="mr-2 text-xs" />
                 <span>API Documentation</span>
@@ -317,10 +337,11 @@ const user = storedUser ? JSON.parse(storedUser) : null;
             <li>
               <Link
                 to="/developers/generate-key"
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/developers/generate-key'
+                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+                  location.pathname === '/developers/generate-key'
                     ? 'bg-teal-800 text-white font-medium'
                     : 'text-white hover:bg-[#2F4F29]'
-                  }`}
+                }`}
               >
                 <FaKey className="mr-2 text-xs" />
                 <span>Generate API Key</span>
@@ -329,10 +350,11 @@ const user = storedUser ? JSON.parse(storedUser) : null;
             <li>
               <Link
                 to="/developers/integration-guide"
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/developers/integration-guide'
+                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+                  location.pathname === '/developers/integration-guide'
                     ? 'bg-teal-800 text-white font-medium'
                     : 'text-white hover:bg-[#2F4F29]'
-                  }`}
+                }`}
               >
                 <FaVideo className="mr-2 text-xs" />
                 <span>Integration Guide</span>
@@ -360,67 +382,76 @@ const user = storedUser ? JSON.parse(storedUser) : null;
         </li> */}
 
         {user && user.isAdmin && (
-  <>
-    <li className="pt-4 mt-4 border-t border-[#2F4F29]">
-      <span className="text-xs font-semibold text-white uppercase tracking-wider pl-3">Admin</span>
-    </li>
+          <>
+            <li className="pt-4 mt-4 border-t border-[#2F4F29]">
+              <span className="text-xs font-semibold text-white uppercase tracking-wider pl-3">
+                Admin
+              </span>
+            </li>
 
-    <li>
-      <div
-        onClick={() => setIsAdminExpanded(!isAdminExpanded)}
-        className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
-          location.pathname.startsWith('/admin')
-            ? 'bg-[#2F4F29] shadow-lg'
-            : 'hover:bg-[#2F4F29] hover:shadow-md hover:pl-4'
-        }`}
-      >
-        <div className="flex items-center">
-          <FaUserCheck className="mr-3 text-teal-300" />
-          <span>Admin Panel</span>
-        </div>
-        <FaChevronRight
-          className={`text-sm opacity-70 transition-transform ${
-            isAdminExpanded ? 'transform rotate-90' : ''
-          }`}
-        />
+            <li>
+              <div
+                onClick={() => setIsAdminExpanded(!isAdminExpanded)}
+                className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
+                  location.pathname.startsWith('/admin')
+                    ? 'bg-[#2F4F29] shadow-lg'
+                    : 'hover:bg-[#2F4F29] hover:shadow-md hover:pl-4'
+                }`}
+              >
+                <div className="flex items-center">
+                  <FaUserCheck className="mr-3 text-teal-300" />
+                  <span>Admin Panel</span>
+                </div>
+                <FaChevronRight
+                  className={`text-sm opacity-70 transition-transform ${
+                    isAdminExpanded ? 'transform rotate-90' : ''
+                  }`}
+                />
+              </div>
+            </li>
+
+            {isAdminExpanded && (
+              <ul className="pl-6 mt-1 space-y-1">
+                <li>
+                  <Link
+                    to="/admin/users"
+                    className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+                      location.pathname === '/admin/users'
+                        ? 'bg-teal-800 text-white font-medium'
+                        : 'text-white hover:bg-[#2F4F29]'
+                    }`}
+                  >
+                    <FaUserCheck className="mr-2 text-xs" />
+                    <span>All Users</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/subs"
+                    className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
+                      location.pathname === '/admin/subs'
+                        ? 'bg-teal-800 text-white font-medium'
+                        : 'text-white hover:bg-[#2F4F29]'
+                    }`}
+                  >
+                    <FaUserCheck className="mr-2 text-xs" />
+                    <span> Subscripton</span>
+                  </Link>
+                </li>
+              </ul>
+            )}
+          </>
+        )}
+      </ul>
+
+      <div className="flex w-full items-center justify-center py-6 ">
+        <button
+          onClick={handleLogout}
+          className="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-300"
+        >
+          Logout
+        </button>
       </div>
-    </li>
-
-    {isAdminExpanded && (
-      <ul className="pl-6 mt-1 space-y-1">
-        <li>
-          <Link
-            to="/admin/users"
-            className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
-              location.pathname === '/admin/users'
-                ? 'bg-teal-800 text-white font-medium'
-                : 'text-white hover:bg-[#2F4F29]'
-            }`}
-          >
-            <FaUserCheck className="mr-2 text-xs" />
-            <span>All Users</span>
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/admin/subs"
-            className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
-              location.pathname === '/admin/subs'
-                ? 'bg-teal-800 text-white font-medium'
-                : 'text-white hover:bg-[#2F4F29]'
-            }`}
-          >
-            <FaUserCheck className="mr-2 text-xs" />
-            <span> Subscripton</span>
-          </Link>
-        </li>
-       
-      </ul>
-    )}
-  </>
-)}
-
-      </ul>
 
       {/* Bottom Decoration */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-400 to-transparent"></div>

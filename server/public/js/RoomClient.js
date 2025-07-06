@@ -6385,7 +6385,7 @@ class RoomClient {
 
 
         // Call the upload API
-        fetch('http://localhost:3010upload-video', {
+        fetch('https://meetix.mahitechnocrafts.inupload-video', {
             method: 'POST',
             body: formData,  // Send the FormData as the request body
         })
@@ -6394,7 +6394,7 @@ class RoomClient {
                 if (data.fileUrl) {
                     console.log('Video uploaded successfully! File URL:', data.fileUrl);
                     // You can handle the file URL here, like displaying it in the UI or saving it
-                    fetch('http://localhost:3010api/v1/user/save-recording', {
+                    fetch('https://meetix.mahitechnocrafts.inapi/v1/user/save-recording', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

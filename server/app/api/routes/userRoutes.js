@@ -7,6 +7,7 @@ const {
   deleteUpcomingMeeting,
   getRoomDetails,
   getUserMeetingsDetails,
+  sendMeetingInvite,
 } = require("../controllers/userCtrl");
 const User = require("../models/User");
 
@@ -26,6 +27,7 @@ router.delete("/delete/:userId/:meetingId", deleteUpcomingMeeting);
 
 router.get('/room-details/:roomId', getRoomDetails);
 router.get('/user-meetings/:userId', getUserMeetingsDetails);
+router.post('/send-meeting-invite', sendMeetingInvite);
 
 
 

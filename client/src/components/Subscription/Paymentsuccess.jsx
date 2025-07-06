@@ -7,7 +7,7 @@ const PaymentSuccess = () => {
     const subscriptionId = new URLSearchParams(window.location.search).get("subscriptionId");
 
     if (license_id && subscriptionId) {
-      axios.post("http://localhost:3010api/subscription/payment-success", {
+      axios.post("https://meetix.mahitechnocrafts.inapi/subscription/payment-success", {
         license_id,
         subscriptionId,
       })

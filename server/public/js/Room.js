@@ -47,7 +47,7 @@ let survey = {
 
 let redirect = {
     enabled: true,
-    url: 'http://localhost:3010/meetings/details',
+    url: 'https://meet.mahitechnocrafts.in/meetings/details',
 };
 
 let recCodecs = null;
@@ -451,7 +451,7 @@ async function refreshMainButtonsToolTipPlacement() {
     console.log("ENTER THE BUTTON SECTION", roomId)
     if (roomId) {
         try {
-            const response = await fetch("http://localhost:3010api/v1/user/testmeeting", {
+            const response = await fetch("https://meetix.mahitechnocrafts.inapi/v1/user/testmeeting", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -1479,37 +1479,63 @@ function copyToClipboard(txt, showTxt = true) {
 }
 
 function shareRoomByEmail() {
-    Swal.fire({
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        background: swalBackground,
-        imageUrl: image.email,
-        position: 'center',
-        title: 'Select a Date and Time',
-        html: '<input type="text" id="datetimePicker" class="flatpickr" />',
-        showCancelButton: true,
-        confirmButtonText: 'OK',
-        cancelButtonColor: 'red',
-        showClass: { popup: 'animate__animated animate__fadeInDown' },
-        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        preConfirm: () => {
-            const newLine = '%0D%0A%0D%0A';
-            const selectedDateTime = document.getElementById('datetimePicker').value;
-            const roomPassword =
-                isRoomLocked && (room_password || rc.RoomPassword)
-                    ? 'Password: ' + (room_password || rc.RoomPassword) + newLine
-                    : '';
-            const email = '';
-            const emailSubject = `Please join our ${BRAND.app.name} Video Chat Meeting`;
-            const emailBody = `The meeting is scheduled at: ${newLine} DateTime: ${selectedDateTime} ${newLine}${roomPassword}Click to join: ${RoomURL} ${newLine}`;
-            document.location = 'mailto:' + email + '?subject=' + emailSubject + '&body=' + emailBody;
-        },
-    });
-    flatpickr('#datetimePicker', {
-        enableTime: true,
-        dateFormat: 'Y-m-d H:i',
-        time_24hr: true,
-    });
+  Swal.fire({
+    title: 'Send Mail to Participants',
+    background: swalBackground,
+    imageUrl: image.email,
+    html: `
+      <input type="email" id="emailInput" class="swal2-input" placeholder="Enter email address" />
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Send',
+    cancelButtonColor: 'red',
+    showClass: { popup: 'animate__animated animate__fadeInDown' },
+    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    preConfirm: async () => {
+      const email = document.getElementById('emailInput').value.trim();
+
+     const isValidEmail = /^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+
+      if (!email || !isValidEmail) {
+        Swal.showValidationMessage('Please enter a valid email address');
+        return false;
+      }
+
+      const roomPassword =
+        isRoomLocked && (room_password || rc.RoomPassword)
+          ? room_password || rc.RoomPassword
+          : null;
+
+      try {
+        const res = await fetch('https://meetix.mahitechnocrafts.in/api/v1/user/send-meeting-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: email,
+            roomURL: RoomURL,
+            password: roomPassword,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to send email');
+        }
+
+       Swal.fire({
+  icon: 'success',
+  title: 'Mail Sent',
+  text: 'Invitation sent successfully!',
+  background: '#ffffff', // light background
+  color: '#333',          // dark readable text
+  iconColor: '#28a745',   // green icon (optional)
+  confirmButtonColor: '#007BFF',
+});
+      } catch (err) {
+        Swal.showValidationMessage('Error sending email: ' + err.message);
+        return false;
+      }
+    },
+  });
 }
 
 // ####################################################
@@ -3639,7 +3665,7 @@ function leaveFeedback() {
 }
 
 function redirectOnLeave() {
-    redirect && redirect.enabled ? openURL(redirect.url) : openURL('http://localhost:3010/meetings/details');
+    redirect && redirect.enabled ? openURL(redirect.url) : openURL('https://meet.mahitechnocrafts.in/meetings/details');
 }
 
 function userLog(icon, message, position, timer = 3000) {

@@ -3,6 +3,7 @@ const Attendee = require('../models/Attendee');
 const Session = require('../models/Session');
 const mailSender = require("../helper/mailsender");
 const meetingTemplate = require("../helper/meetingTemplate");
+const { basicMeetingInviteTemplate } = require("../helper/sendMailMeeting");
 
 
 // 🔹 Add an upcoming meeting
@@ -327,5 +328,25 @@ exports.getUserMeetingsDetails = async (req, res) => {
       message: 'Server error',
       error: err.message
     });
+  }
+};
+
+
+exports.sendMeetingInvite = async (req, res) => {
+  try {
+    const { to, roomURL, password } = req.body;
+
+    if (!to || !roomURL) {
+      return res.status(400).json({ success: false, message: 'Email and Room URL are required.' });
+    }
+
+    const html = basicMeetingInviteTemplate({ roomURL, password });
+
+    await mailSender(to, 'Join Your Video Meeting', html);
+
+    res.status(200).json({ success: true, message: 'Email sent successfully.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Failed to send email.' });
   }
 };
