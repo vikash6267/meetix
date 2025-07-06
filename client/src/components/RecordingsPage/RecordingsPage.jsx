@@ -25,7 +25,7 @@ const RecordingsPage = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `https://meetix.mahitechnocrafts.inapi/v1/user/recordings/${user?._id}`,
+        `https://meetix.mahitechnocrafts.in/api/v1/user/recordings/${user?._id}`,
       );
       console.log(response.data.recordings);
       setRecordings(response.data.recordings);

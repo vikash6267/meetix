@@ -2801,7 +2801,7 @@ app.get('/', OIDCAuth, async (req, res) => {
 
 
 
-      fetch('https://meetix.mahitechnocrafts.inapi/v1/user/messagePush', {
+      fetch('https://meetix.mahitechnocrafts.in/api/v1/user/messagePush', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
