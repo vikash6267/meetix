@@ -293,6 +293,26 @@ const getAllUsers = async (req, res) => {
 };
 
 
+const deleteSubscriptionCtrl = async (req, res) => {
+  try {
+    const { subscriptionId } = req.params;
+
+    if (!subscriptionId) {
+      return res.status(400).json({ message: "Missing subscriptionId" });
+    }
+
+    const deletedSubscription = await subscriptionModel.findByIdAndDelete(subscriptionId);
+
+    if (!deletedSubscription) {
+      return res.status(404).json({ message: "Subscription not found" });
+    }
+
+    return res.status(200).json({ message: "Subscription deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting subscription:", error);
+    return res.status(500).json({ message: "Failed to delete subscription", error: error.message });
+  }
+};
 
 module.exports = { 
     createSubscriptionCtrl, 
@@ -303,5 +323,6 @@ module.exports = {
     getUserSubscriptionsCtrl,
     addMeetingToUser,
     getAllUsers,
-    editSubscription
+    editSubscription,
+    deleteSubscriptionCtrl
  }
