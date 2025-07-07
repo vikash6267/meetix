@@ -10,6 +10,7 @@ const {
   sendMeetingInvite,
 } = require("../controllers/userCtrl");
 const User = require("../models/User");
+const { sendOtp, verifyOtp } = require("../controllers/otpCtrl");
 
 // 🔹 Add an upcoming meeting
 router.post("/create/:userId", addUpcomingMeeting);
@@ -236,4 +237,10 @@ router.get('/room-activity/:id', async (req, res) => {
     });
   }
 });
+
+
+
+router.post("/send-otp", sendOtp);
+router.post("/verify-otp", verifyOtp);
+
 module.exports = router;

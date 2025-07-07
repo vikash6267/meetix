@@ -804,75 +804,7 @@ function LandingPage() {
               </p>
             </div>
 
-            {/* Pricing Cards */}
-            {false && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {/* Free Plan */}
-                <div className="bg-gradient-to-r from-[#FFFFFF] to-[#a1e971] p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow flex flex-col slide-in-left">
-                  <h4 className="text-2xl font-semibold text-gray-900 mb-4">
-                    Free
-                  </h4>
-                  <p className="text-lg font-bold text-blue-600 mb-4">
-                    $0/month
-                  </p>
-                  <ul className="text-gray-600 mb-6 space-y-2 flex-grow">
-                    <li>Unlimited 1-on-1 meetings</li>
-                    <li>Up to 100 participants</li>
-                    <li>Screen sharing</li>
-                  </ul>
-                  <Link
-                    to={'/free-plans'}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 mt-auto text-center"
-                  >
-                    Get Started
-                  </Link>
-                </div>
-
-                {/* Pro Plan */}
-                <div className="bg-gradient-to-r from-[#FFFFFF] to-[#a1e971] p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow flex flex-col slide-in-bottom">
-                  <h4 className="text-2xl font-semibold text-gray-900 mb-4">
-                    Pro
-                  </h4>
-                  <p className="text-lg font-bold text-blue-600 mb-4">
-                    $9.99/month
-                  </p>
-                  <ul className="text-gray-600 mb-6 space-y-2 flex-grow">
-                    <li>All Free features +</li>
-                    <li>Cloud recording</li>
-                    <li>Custom backgrounds</li>
-                    <li>Analytics</li>
-                  </ul>
-                  <Link
-                    to={'/pro-plans'}
-                    className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 mt-auto text-center"
-                  >
-                    Upgrade Now
-                  </Link>
-                </div>
-
-                {/* Business Plan */}
-                <div className="bg-gradient-to-r from-[#FFFFFF] to-[#a1e971] p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow flex flex-col slide-in-right">
-                  <h4 className="text-2xl font-semibold text-gray-900 mb-4">
-                    Business
-                  </h4>
-                  <p className="text-lg font-bold text-blue-600 mb-4">
-                    $19.99/month
-                  </p>
-                  <ul className="text-gray-600 mb-6 space-y-2 flex-grow">
-                    <li>All Pro features +</li>
-                    <li>300 participants</li>
-                    <li>Admin dashboard</li>
-                    <li>Priority support</li>
-                  </ul>
-                  <Link
-                    to={'/business-plans'}
-                    className="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition duration-300 mt-auto text-center"
-                  >
-                    Get Started
-                  </Link>
-                </div>
-              </div>
-            )}
+       
 
             <AllSubscriptions />
           </div>

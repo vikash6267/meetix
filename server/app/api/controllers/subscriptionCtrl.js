@@ -7,103 +7,170 @@ const whopSdk = require("../config/whop");
 
 const createSubscriptionCtrl = async (req, res) => {
   try {
-    const { subscriptionId, metadata, redirectUrl } = req.body;
-console.log(req.body)
-    if (!subscriptionId || !redirectUrl) {
-      return res.status(400).json({ message: "Missing subscriptionId or redirectUrl" });
+    const { subscriptionId, metadata } = req.body;
+    console.log("🟢 Received request for subscription:", req.body);
+
+    // Validate required fields
+    if (!subscriptionId) {
+      return res.status(400).json({
+        message: "❌ Missing required field: subscriptionId",
+      });
     }
 
-    // Get subscription with whopPlanId
+    // Fetch subscription from database
     const subscription = await subscriptionModel.findById(subscriptionId);
-    console.log(subscription)
-    if (!subscription || !subscription.whopPlanId) {
-      return res.status(404).json({ message: "Subscription or Whop Plan ID not found." });
+    console.log("📦 Fetched subscription from DB:", subscription);
+
+    if (!subscription) {
+      return res.status(404).json({
+        message: "❌ Subscription not found in database",
+      });
     }
 
-    // Create checkout session
-    const session = await whopSdk.payments.createCheckoutSession({
-      planId: subscription.whopPlanId,
-      metadata,
-      redirectUrl,
-    });
+    if (!subscription.whopPlanId) {
+      return res.status(400).json({
+        message: "❌ Whop Plan ID not configured for this subscription",
+      });
+    }
 
+    // Create checkout session with Whop
+    const sessionPayload = {
+      planId: subscription.whopPlanId,
+      metadata: metadata || {}
+    };
+
+    console.log("🚀 Creating Whop checkout session with:", sessionPayload);
+
+    const session = await whopSdk.payments.createCheckoutSession(sessionPayload);
+
+    console.log("✅ Whop session created:", session);
+
+    if (!session || !session.id) {
+      return res.status(500).json({
+        message: "❌ Failed to create checkout session with Whop - no session ID returned",
+      });
+    }
+
+    // Return the checkout URL
+    const redirectUrl = `https://whop.com/checkout/${session.id}`;
     return res.status(200).json({
-      sessionId: session.id,
-      redirectUrl: `https://whop.com/checkout/${session.id}`,
-    });
+  success: true,
+  sessionId: session.id,
+  redirectUrl: `https://whop.com/checkout/${session.id}`,
+  message: "✅ Checkout session created successfully",
+});
+
+
   } catch (error) {
-    console.error("Whop createCheckoutSession error:", error);
-    return res.status(500).json({ message: "Failed to create checkout session", error: error.message });
+    console.error("❌ Whop createCheckoutSession error:", error);
+
+    if (error.response) {
+      console.error("🧨 Whop API response error:", error.response.data);
+      return res.status(error.response.status || 500).json({
+        message: "Whop API error",
+        error: error.response.data?.message || error.message,
+        details: error.response.data,
+      });
+    }
+
+    return res.status(500).json({
+      message: "❌ Failed to create checkout session",
+      error: error.message,
+    });
   }
 };
-
-
-
-
-
-
 
 
 const verifyPaymentCtrl = async (req, res) => {
   try {
-    const { license_id, subscriptionId } = req.body;
-    const userId = req.user.id;
+    const { license_id, subscriptionId } = req.body
+    const userId = req.user.id
+
+    console.log("Verifying payment:", { license_id, subscriptionId, userId })
 
     if (!license_id || !subscriptionId) {
-      return res.status(400).json({ message: "Missing license or subscription ID." });
+      return res.status(400).json({
+        message: "Missing license_id or subscriptionId",
+      })
     }
 
-    const subscription = await subscriptionModel.findById(subscriptionId);
+    // Fetch subscription from database
+    const subscription = await subscriptionModel.findById(subscriptionId)
     if (!subscription) {
-      return res.status(404).json({ message: "Subscription not found." });
+      return res.status(404).json({
+        message: "Subscription not found",
+      })
     }
 
-    // Fetch license details from Whop
-    const license = await whop.license.retrieve(license_id);
-    if (!license || license.status !== "active") {
-      return res.status(400).json({ message: "Invalid or inactive license." });
+    // Verify license with Whop
+    try {
+      const license = await whopSdk.licenses.retrieve(license_id)
+      console.log("Retrieved license:", license)
+
+      if (!license || license.status !== "active") {
+        return res.status(400).json({
+          message: "Invalid or inactive license",
+        })
+      }
+
+      const enrollmentDate = new Date(license.created_at)
+      const expirationDate = license.expires_at
+        ? new Date(license.expires_at)
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default 30 days
+
+      // Update user subscription
+      await authModel.findByIdAndUpdate(userId, {
+        $push: {
+          subscriptions: {
+            service: subscription._id,
+            enrollmentDate,
+            expirationDate,
+            isActive: true,
+            transaction_id: license.id,
+            payable: subscription.rate,
+            expiryMail: 0,
+          },
+        },
+      })
+
+      // Update subscription users
+      await subscriptionModel.findByIdAndUpdate(subscriptionId, {
+        $push: {
+          usersEnroled: {
+            user: userId,
+            enrollmentDate,
+            expirationDate,
+            transaction_id: license.id,
+            payable: subscription.rate,
+            expiryMail: 0,
+          },
+        },
+      })
+
+      return res.status(200).json({
+        success: true,
+        message: "License verified and subscription activated successfully",
+        subscription: {
+          id: subscription._id,
+          type: subscription.type,
+          expirationDate,
+        },
+      })
+    } catch (whopError) {
+      console.error("Whop license verification error:", whopError)
+      return res.status(400).json({
+        message: "Failed to verify license with Whop",
+        error: whopError.message,
+      })
     }
-
-    const enrollmentDate = new Date(license.created_at);
-    const expirationDate = new Date(subscription.endDate); // You can use license.expires_at if available
-
-    // Add to User
-    await authModel.findByIdAndUpdate(userId, {
-      $push: {
-        subscriptions: {
-          service: subscription._id,
-          enrollmentDate,
-          expirationDate,
-          isActive: true,
-          transaction_id: license.id,
-          payable: subscription.rate,
-          expiryMail: 0,
-        },
-      },
-    });
-
-    // Add to Subscriptions
-    await subscriptionModel.findByIdAndUpdate(subscriptionId, {
-      $push: {
-        usersEnroled: {
-          user: userId,
-          enrollmentDate,
-          expirationDate,
-          transaction_id: license.id,
-          payable: subscription.rate,
-          expiryMail: 0,
-        },
-      },
-    });
-
-    return res.status(200).json({ message: "License verified and subscription added." });
-
   } catch (error) {
-    console.error("Error in verifyPaymentCtrl:", error.message);
-    return res.status(500).json({ message: "Internal server error." });
+    console.error("Error in verifyPaymentCtrl:", error)
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    })
   }
-};
-
+}
 
 
 const getAllSubctrl = async (req, res) => {
