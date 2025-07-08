@@ -243,4 +243,19 @@ router.get('/room-activity/:id', async (req, res) => {
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);
 
+
+
+
+
+const jwt = require('jsonwebtoken');
+
+router.post('/generate-token', (req, res) => {
+  const { userId } = req.body;
+  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: '30d',
+  });
+
+  res.json({ token });
+});
+
 module.exports = router;

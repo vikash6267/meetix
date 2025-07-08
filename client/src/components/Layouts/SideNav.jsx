@@ -334,19 +334,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 <span>API Documentation</span>
               </Link>
             </li>
-            <li>
-              <Link
-                to="/developers/generate-key"
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
-                  location.pathname === '/developers/generate-key'
-                    ? 'bg-teal-800 text-white font-medium'
-                    : 'text-white hover:bg-[#2F4F29]'
-                }`}
-              >
-                <FaKey className="mr-2 text-xs" />
-                <span>Generate API Key</span>
-              </Link>
-            </li>
+          
             <li>
               <Link
                 to="/developers/integration-guide"
