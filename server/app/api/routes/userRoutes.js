@@ -11,6 +11,7 @@ const {
 } = require("../controllers/userCtrl");
 const User = require("../models/User");
 const { sendOtp, verifyOtp } = require("../controllers/otpCtrl");
+const bcrypt = require('bcrypt');
 
 // 🔹 Add an upcoming meeting
 router.post("/create/:userId", addUpcomingMeeting);
@@ -256,6 +257,67 @@ router.post('/generate-token', (req, res) => {
   });
 
   res.json({ token });
+});
+
+
+
+
+
+
+
+
+
+
+// POST /change-password
+router.post('/change-password', async (req, res) => {
+  const { userId, currentPassword, newPassword } = req.body;
+
+  if (!userId || !currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    // Compare current password with stored hash
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Current password is incorrect.' });
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Save new password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password changed successfully.' });
+  } catch (err) {
+    console.error('Password Change Error:', err);
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
+});
+// POST /user/api/v1/set-role
+router.post("/set-role", async (req, res) => {
+  const { userId, role } = req.body;
+
+  if (!userId || !role) {
+    return res.status(400).json({ message: "User ID and role are required." });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.isAdmin = role === "admin" ? "true" : "false";
+    await user.save();
+
+    res.status(200).json({ message: `User role updated to ${role}` });
+  } catch (err) {
+    console.error("Set Role Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 module.exports = router;

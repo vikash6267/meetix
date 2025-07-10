@@ -42,6 +42,7 @@ import SubscriptionDashboard from './pages/Admin/Subscription';
 import MeetingDetails from './pages/Meeting/MeetingDetails';
 import PrivateRoute from './components/routes/PrivateRoute';
 import PaymentSuccess from './components/Subscription/Paymentsuccess';
+import Settings from './pages/Admin/Setting';
 
 export const router = createBrowserRouter([
   // { path: '/', element: <IntroductionPage /> },
@@ -55,6 +56,11 @@ export const router = createBrowserRouter([
  { path: '/meetings/recordings', element: 
   <PrivateRoute>
     <RecordingsPage />
+  </PrivateRoute>
+},
+ { path: '/setting', element: 
+  <PrivateRoute>
+    <Settings />
   </PrivateRoute>
 },
 { path: '/dashboard/attendance', element: 

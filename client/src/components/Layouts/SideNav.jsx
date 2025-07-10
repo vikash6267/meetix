@@ -1,3 +1,4 @@
+import { Settings } from 'lucide-react';
 import React, { useState } from 'react';
 import {
   FaHome,
@@ -440,6 +441,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           Logout
         </button>
       </div>
+
+     <div className="flex w-full items-center justify-center py">
+      <Link
+        to="/setting"
+        className="flex items-center gap-2 px-2 py-2 bg-white shadow-lg border border-gray-200 rounded-full text-gray-800 hover:bg-gray-200 transition-all duration-300"
+      >
+        <Settings className="w-5 h-5" />
+        <span className="font-medium">Setting</span>
+      </Link>
+    </div>
 
       {/* Bottom Decoration */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-400 to-transparent"></div>

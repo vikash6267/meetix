@@ -52,7 +52,8 @@ const EnhancedUserDashboard = () => {
   // Filter, Search, and Sort Logic
   useEffect(() => {
     let filtered = users
-
+console.log(users)
+console.log(filterType)
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(
@@ -67,7 +68,8 @@ const EnhancedUserDashboard = () => {
     if (filterType !== "all") {
       switch (filterType) {
         case "admin":
-          filtered = filtered.filter((user) => user.isAdmin === "true")
+       filtered = filtered.filter((user) => user.isAdmin == "true")
+
         case "regular":
           filtered = filtered.filter((user) => user.isAdmin !== "true")
           break
@@ -661,6 +663,36 @@ const EnhancedUserDashboard = () => {
                       <span className="font-medium">Joined:</span> {formatDate(selectedUser.createdAt)}
                     </p>
                   </div>
+
+                  <div className="mt-4">
+  <label className="block text-sm font-medium text-gray-700 mb-1">Change Role</label>
+  <select
+    className="border border-gray-300 rounded px-3 py-2 text-sm"
+    value={selectedUser?.isAdmin === "true" ? "admin" : "user"}
+    onChange={async (e) => {
+      const newRole = e.target.value;
+      try {
+        const res = await axios.post(`https://meetix.mahitechnocrafts.in/api/v1/user/set-role`, {
+          userId: selectedUser._id,
+          role: newRole,
+        });
+      
+        // Update UI locally (optional)
+        setSelectedUser((prev) => ({
+          ...prev,
+          isAdmin: newRole === "admin" ? "true" : "false",
+        }));
+      } catch (err) {
+        console.error("Role Update Error:", err);
+       
+      }
+    }}
+  >
+    <option value="user">User</option>
+    <option value="admin">Admin</option>
+  </select>
+</div>
+
                 </div>
 
                 <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-6">

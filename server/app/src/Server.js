@@ -67,6 +67,7 @@ dev dependencies: {
  * @version 1.8.21
  *
  */
+const cron = require("node-cron");
 
 const express = require('express');
 const { auth, requiresAuth } = require('express-openid-connect');
@@ -152,6 +153,9 @@ const CryptoJS = require('crypto-js');
 const qS = require('qs');
 const { addMeetingToUser } = require('../api/controllers/subscriptionCtrl.js');
 const { checkRoomParticipantLimit } = require('./middleware/subscriptionLimits.js');
+const meetingTemplate = require("../api/helper/meetingTemplate.js");
+const mailSender = require("../api/helper/mailsender.js");
+const remindermeetingTemplate = require("../api/helper/reminderMail.js");
 const slackEnabled = config?.integrations?.slack?.enabled || false;
 const slackSigningSecret = config?.integrations?.slack?.signingSecret || '';
 
@@ -302,6 +306,66 @@ if (rtmpEnabled) {
     }
 }
 
+
+// ⏰ Runs every 1 minute
+cron.schedule("* * * * *", async () => {
+  console.log(`[CRON] Running meeting notifier at ${new Date().toLocaleString()}`);
+
+  try {
+    const users = await User.find({ "upCommingMeetings.0": { $exists: true } });
+
+    const now = new Date();
+
+    for (const user of users) {
+      let updated = false;
+
+      for (const meeting of user.upCommingMeetings) {
+        if (
+          !meeting.noti30min &&
+          !meeting.isCancelled &&
+          !meeting.isJoined
+        ) {
+          const timeDiff = (new Date(meeting.scheduleDateTime) - now) / 60000;
+
+          if (timeDiff <= 30 && timeDiff > 0) {
+            const emailHTML = remindermeetingTemplate({
+              type: "reminder",
+              meetingName: meeting.meetingName,
+              scheduleDateTime: meeting.scheduleDateTime,
+              shortSummary: meeting.shortSummary,
+              roomId: meeting.roomId,
+            });
+
+            const subject = `🔔 Reminder: "${meeting.meetingName}" starts in ${Math.floor(timeDiff)} min`;
+
+            // 📨 1. Send to the user who owns the meeting
+            await mailSender(user.email, subject, emailHTML);
+
+            // 📨 2. Send to each participant
+            if (Array.isArray(meeting.participants)) {
+              for (const participantEmail of meeting.participants) {
+                if (participantEmail && participantEmail !== user.email) {
+                  await mailSender(participantEmail, subject, emailHTML);
+                }
+              }
+            }
+
+            // ✅ Mark as notified
+            meeting.noti30min = true;
+            updated = true;
+          }
+        }
+      }
+
+      if (updated) {
+        await user.save();
+        console.log(`✅ Updated user ${user.username} with notified meetings`);
+      }
+    }
+  } catch (error) {
+    console.error("❌ CRON error in meeting notification:", error.message);
+  }
+});
 // html views
 const views = {
     html: path.join(__dirname, '../../public/views'),

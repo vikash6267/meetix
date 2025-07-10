@@ -58,24 +58,30 @@ const userSchema = new mongoose.Schema({
 
     },
   ],
+
+  isAdmin: {
+    type: String,
+    default: "false"
+  },
   meetings: [
     {
       roomId: { type: String },
       joinedAt: { type: Date, default: Date.now }
     }
   ],
-upCommingMeetings: [
-  {
-    roomId: { type: String },
-    meetingName: { type: String },
-    scheduleDateTime: { type: Date, default: Date.now },
-    isJoined: { type: Boolean, default: false },
-    joinedAt: { type: Date, default: Date.now },
-    shortSummary: { type: String },
-    participants: [{ type: String, match: /.+\@.+\..+/ }],
-    isCancelled: { type: Boolean, default: false } // ✅ NEW FIELD
-  }
-]
+  upCommingMeetings: [
+    {
+      roomId: { type: String },
+      meetingName: { type: String },
+      scheduleDateTime: { type: Date, default: Date.now },
+      isJoined: { type: Boolean, default: false },
+      joinedAt: { type: Date, default: Date.now },
+      shortSummary: { type: String },
+      participants: [{ type: String, match: /.+\@.+\..+/ }],
+      isCancelled: { type: Boolean, default: false } ,
+      noti30min: { type: Boolean, default: false } ,
+    }
+  ]
 
   ,
   recordings: [
