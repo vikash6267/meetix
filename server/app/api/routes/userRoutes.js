@@ -8,10 +8,14 @@ const {
   getRoomDetails,
   getUserMeetingsDetails,
   sendMeetingInvite,
+  checkIfUserJoinedMeeting,
+  updateProfile,
+  getProfile,
 } = require("../controllers/userCtrl");
 const User = require("../models/User");
 const { sendOtp, verifyOtp } = require("../controllers/otpCtrl");
 const bcrypt = require('bcrypt');
+const OTP = require("../models/OTP");
 
 // 🔹 Add an upcoming meeting
 router.post("/create/:userId", addUpcomingMeeting);
@@ -249,6 +253,7 @@ router.post("/verify-otp", verifyOtp);
 
 
 const jwt = require('jsonwebtoken');
+const mailSender = require("../helper/mailsender");
 
 router.post('/generate-token', (req, res) => {
   const { userId } = req.body;
@@ -319,5 +324,79 @@ router.post("/set-role", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
+
+
+
+
+
+
+
+router.post("/request-role-change-otp", async (req, res) => {
+  const { email, userId, role } = req.body;
+
+  if (!email || !userId || !role) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    const admin = await User.findOne({ email, isAdmin: "true" });
+    if (!admin) {
+      return res.status(403).json({ message: "Only a valid admin can perform this action." });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await OTP.findOneAndUpdate(
+      { email },
+      { otp, createdAt: Date.now() },
+      { upsert: true }
+    );
+
+    const htmlBody = `
+      <p>Dear Admin,</p>
+      <p>Your OTP for changing the role of a user is:</p>
+      <h2>${otp}</h2>
+      <p>This OTP is valid for 5 minutes. Do not share it with anyone.</p>
+      <p>Regards,<br/>Mahi Technocrafts Team</p>
+    `;
+
+    await mailSender(email, "OTP for Role Change", htmlBody);
+
+    res.status(200).json({ message: "OTP sent successfully." });
+  } catch (err) {
+    console.error("OTP Send Error:", err);
+    res.status(500).json({ message: "Server error while sending OTP." });
+  }
+});
+
+
+
+router.post("/verify-role-change-otp", async (req, res) => {
+  const { email, otp, userId, role } = req.body;
+
+  const otpRecord = await OTP.findOne({ email });
+  if (!otpRecord) return res.status(400).json({ message: "OTP not found." });
+
+  const isValid = otpRecord.otp === otp && (Date.now() - otpRecord.createdAt.getTime()) < 5 * 60 * 1000;
+  if (!isValid) return res.status(400).json({ message: "Invalid or expired OTP." });
+
+  const user = await User.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found." });
+
+  user.isAdmin = role === "admin" ? "true" : "false";
+  await user.save();
+  await OTP.deleteOne({ email });
+
+  res.status(200).json({ message: `User role updated to ${role}` });
+});
+
+
+
+
+router.get('/check/:userId/:roomId', checkIfUserJoinedMeeting);
+router.put("/update-profile", updateProfile);
+router.get('/myprofile/:id', getProfile);
 
 module.exports = router;

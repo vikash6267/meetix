@@ -43,6 +43,7 @@ import MeetingDetails from './pages/Meeting/MeetingDetails';
 import PrivateRoute from './components/routes/PrivateRoute';
 import PaymentSuccess from './components/Subscription/Paymentsuccess';
 import Settings from './pages/Admin/Setting';
+import MeetingCheck from './pages/MeetingCheck';
 
 export const router = createBrowserRouter([
   // { path: '/', element: <IntroductionPage /> },
@@ -51,6 +52,8 @@ export const router = createBrowserRouter([
   { path: '/join-room', element: <JoinRoomPage /> },
   { path: '/login', element: <SignIn /> },
   { path: '/sign-up', element: <SignUp /> },
+  { path: "/join/:id/:userId" ,element:<MeetingCheck /> },
+
   // { path: '/dashboard', element: <DashboardPage /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
  { path: '/meetings/recordings', element: 
@@ -89,7 +92,7 @@ export const router = createBrowserRouter([
     <NewMeetingPage />
   </PrivateRoute>
 },
-{ path: '/meetings/upcoming', element: 
+{ path: '/meetings2/upcoming', element: 
   <PrivateRoute>
     <UpcomingMeetingPage />
   </PrivateRoute>

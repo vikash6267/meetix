@@ -22,7 +22,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
   const [isMeetingsExpanded, setIsMeetingsExpanded] = useState(
     location.pathname === '/meetings' ||
-      location.pathname.startsWith('/meetings/'),
+      location.pathname.startsWith('/meetings2/'),
   );
 
   const [isAnalysisExpanded, setIsAnalysisExpanded] = useState(
@@ -109,7 +109,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <div
             onClick={() => setIsAnalysisExpanded(!isAnalysisExpanded)}
             className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
-              location.pathname.startsWith('/dashboard')
+              location.pathname.startsWith('/meetings/')
                 ? 'bg-[#2F4F29]  shadow-lg'
                 : 'hover:bg-[#2F4F29]  hover:shadow-md hover:pl-4'
             }`}
@@ -140,42 +140,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 <span>View Meetings</span>
               </Link>
             </li>
-            {/* <li>
-              <Link
-                to="/dashboard/attendance"
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/dashboard/attendance'
-                    ? 'bg-teal-800 text-white font-medium'
-                    : 'text-white hover:bg-[#2F4F29] '
-                  }`}
-              >
-                <FaUserCheck className="mr-2 text-xs" />
-                <span>Attendance</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/chat-messages"
-                className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/dashboard/chat-messages'
-                    ? 'bg-teal-800 text-white font-medium'
-                    : 'text-white hover:bg-[#2F4F29] '
-                  }`}
-              >
-                <FaUserCheck className="mr-2 text-xs" />
-                <span>Chat Messages</span>
-              </Link>
-            </li> */}
-            {/* <li>
-              <Link
-                to="/dashboard/session"
-                className={`flex items-center p-2 text-sm rounded-lg transition-colors ${location.pathname === '/dashboard/session'
-                    ? 'bg-teal-800 text-white font-medium'
-                    : 'text-[#2F4F29]       200 hover:bg-[#2F4F29]       700'
-                  }`}
-              >
-                <FaUserCheck className="mr-2 text-xs" />
-                <span>Sessions</span>
-              </Link>
-            </li> */}
+           
           </ul>
         )}
 
@@ -183,8 +148,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <div
             onClick={() => setIsMeetingsExpanded(!isMeetingsExpanded)}
             className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 cursor-pointer ${
-              location.pathname === '/meetings' ||
-              location.pathname.startsWith('/meetings/')
+              location.pathname === '/meetings2' ||
+              location.pathname.startsWith('/meetings2/')
                 ? 'bg-[#2F4F29]       600 shadow-lg'
                 : 'hover:bg-[#2F4F29]       700 hover:shadow-md hover:pl-4'
             }`}
@@ -218,9 +183,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </li>
             <li>
               <Link
-                to="/meetings/upcoming"
+                to="/meetings2/upcoming"
                 className={`text-white flex items-center p-2 text-sm rounded-lg transition-colors ${
-                  location.pathname === '/meetings/upcoming'
+                  location.pathname === '/meetings2/upcoming'
                     ? 'bg-teal-800 text-white font-medium'
                     : 'text-white hover:bg-[#2F4F29]'
                 }`}

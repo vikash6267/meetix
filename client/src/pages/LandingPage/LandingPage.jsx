@@ -83,184 +83,193 @@ function LandingPage() {
                         </h1> */}
 
             <div className=" text-white">
-  <div className="py-12 max-w-7xl mx-auto px-4 md:px-8  flex flex-col lg:flex-row items-center gap-12">
-    
-    {/* Left - Hero Section */}
-    <div className="flex flex-col items-center lg:items-start gap-6 text-center lg:text-left flex-1">
-      <span className="bg-white/10 backdrop-blur-lg border border-white/20 text-white px-6 py-2 rounded-full text-sm font-medium shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-        🎉 | All-in-One Video Collaboration Platform
-      </span>
+              <div className="py-12 max-w-7xl mx-auto px-4 md:px-8  flex flex-col lg:flex-row items-center gap-12">
+                {/* Left - Hero Section */}
+                <div className="flex flex-col items-center lg:items-start gap-6 text-center lg:text-left flex-1">
+                  <span className="bg-white/10 backdrop-blur-lg border border-white/20 text-white px-6 py-2 rounded-full text-sm font-medium shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+                    🎉 | All-in-One Video Collaboration Platform
+                  </span>
 
-      <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
-        Meetix — 📹 Redefining Virtual
-      </h1>
-      <span className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight bg-[#5a4ded] rounded-2xl px-2">
-        Connections
-      </span>
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight">
+                    Meetix — 📹 Redefining Virtual
+                  </h1>
+                  <span className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight bg-[#5a4ded] rounded-2xl px-2">
+                    Connections
+                  </span>
 
-      <p className="text-sm md:text-lg text-gray-300 max-w-3xl hidden md:block">
-        <span className="font-semibold text-white">
-          The Future of Meetings & Webinars Starts Here.
-        </span>
-        <br />
-        Welcome to Meetix — the all-in-one video collaboration platform
-        built for modern teams, educators, creators, and enterprises.
-        Say goodbye to time limits, laggy calls, and confusing
-        interfaces. Whether you're hosting a 1:1, a team sync, or a
-        1,000-person webinar, Meetix keeps it fast, flawless, and free.
-      </p>
+                  <p className="text-sm md:text-lg text-gray-300 max-w-3xl hidden md:block">
+                    <span className="font-semibold text-white">
+                      The Future of Meetings & Webinars Starts Here.
+                    </span>
+                    <br />
+                    Welcome to Meetix — the all-in-one video collaboration
+                    platform built for modern teams, educators, creators, and
+                    enterprises. Say goodbye to time limits, laggy calls, and
+                    confusing interfaces. Whether you're hosting a 1:1, a team
+                    sync, or a 1,000-person webinar, Meetix keeps it fast,
+                    flawless, and free.
+                  </p>
 
-      <div className="flex gap-4 flex-wrap justify-center lg:justify-start">
-        <a
-          href="/create-meeting"
-          className="bg-[#5a4ded] text-white px-6 py-3 rounded-full font-semibold transition shadow-md"
-        >
-          Get Started
-        </a>
-      </div>
-    </div>
+                  <div className="flex gap-4 flex-wrap justify-center lg:justify-start">
+                    <a
+                      href="/create-meeting"
+                      className="bg-[#5a4ded] text-white px-6 py-3 rounded-full font-semibold transition shadow-md"
+                    >
+                      Get Started
+                    </a>
+                  </div>
+                </div>
 
-    {/* Right - Image + Features */}
-    <div className="flex-1 space-y-6">
-      <div className="rounded-xl overflow-hidden shadow-lg">
-        <img
-          src="https://img.freepik.com/free-photo/friends-family-making-videocall-catching-up_23-2149019117.jpg"
-          alt="Meeting result and video UI"
-          className="w-full object-cover rounded-xl"
-        />
-      </div>
-      <div className="bg-[#5a4ded] p-4 rounded-xl border border-white/10 text-sm text-white shadow-md">
-        <div className="flex items-start gap-3">
-          <div className="bg-white/10 p-2 rounded-full">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 11c0-1.105.672-2 1.5-2s1.5.895 1.5 2-.672 2-1.5 2S12 12.105 12 11z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 20h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
-              />
-            </svg>
-          </div>
-          <p>
-            <strong>Meetix</strong> keeps your conversations private and your
-            notes sharp — <em>automatically</em>.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
+                {/* Right - Image + Features */}
+                <div className="flex-1 space-y-6">
+                  <div className="rounded-xl overflow-hidden shadow-lg">
+                    <img
+                      src="https://img.freepik.com/free-photo/friends-family-making-videocall-catching-up_23-2149019117.jpg"
+                      alt="Meeting result and video UI"
+                      className="w-full object-cover rounded-xl"
+                    />
+                  </div>
+                  <div className="bg-[#5a4ded] p-4 rounded-xl border border-white/10 text-sm text-white shadow-md">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-white/10 p-2 rounded-full">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 11c0-1.105.672-2 1.5-2s1.5.895 1.5 2-.672 2-1.5 2S12 12.105 12 11z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 20h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"
+                          />
+                        </svg>
+                      </div>
+                      <p>
+                        <strong>Meetix</strong> keeps your conversations private
+                        and your notes sharp — <em>automatically</em>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Features Section */}
           <div
-  ref={featuresRef}
-  className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 ${featuresInView ? 'zoom-in' : ''}`}
->
-  {/* Feature Card */}
-  <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-left transition-all duration-300 hover:scale-105">
-    <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
-      <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
-      <div className="z-10 bg-blue-100 p-4 rounded-full">
-        <LockOpenIcon className="h-10 w-10 text-[#5a4ded]" />
-      </div>
-    </div>
-    <div className="p-6 text-center relative flex flex-col items-center overflow-hidden">
-      <div className='border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0'></div>
-      <h3 className="text-xl font-bold text-white mb-3">☑️ Unlimited Everything</h3>
-      <p className="text-gray-300 text-sm text-left">
-  Unlimited meeting durations, no participant limits — just pure, uninterrupted collaboration.
-</p>
+            ref={featuresRef}
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 ${featuresInView ? 'zoom-in' : ''}`}
+          >
+            {/* Feature Card */}
+            <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-left transition-all duration-300 hover:scale-105">
+              <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
+                <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
+                <div className="z-10 bg-blue-100 p-4 rounded-full">
+                  <LockOpenIcon className="h-10 w-10 text-[#5a4ded]" />
+                </div>
+              </div>
+              <div className="p-6 text-center relative flex flex-col items-center overflow-hidden">
+                <div className="border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0"></div>
+                <h3 className="text-xl font-bold text-white mb-3">
+                  ☑️ Unlimited Everything
+                </h3>
+                <p className="text-gray-300 text-sm text-left">
+                  Unlimited meeting durations, no participant limits — just
+                  pure, uninterrupted collaboration.
+                </p>
+              </div>
+            </div>
 
-    </div>
-  </div>
+            {/* Feature Card */}
+            <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-bottom transition-all duration-300 hover:scale-105">
+              <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
+                <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
+                <div className="z-10 bg-green-100 p-4 rounded-full">
+                  <UserGroupIcon className="h-10 w-10 text-[#5a4ded]" />
+                </div>
+              </div>
+              <div className=" p-6 text-center relative overflow-hidden">
+                <div className="border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0"></div>
+                <h3 className="text-xl font-bold text-white mb-3">
+                  ☑️ Meet & Present Like a Pro
+                </h3>
+                <p className="text-gray-300 text-sm text-left">
+                  Host up to 100 participants (1,000 with upgrades) with
+                  presenter mode, audience chat, Q&A, and polls built in.
+                </p>
+              </div>
+            </div>
 
-  {/* Feature Card */}
-  <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-bottom transition-all duration-300 hover:scale-105">
-    <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
-      <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
-      <div className="z-10 bg-green-100 p-4 rounded-full">
-        <UserGroupIcon className="h-10 w-10 text-[#5a4ded]" />
-      </div>
-    </div>
-    <div className=" p-6 text-center relative overflow-hidden">
-      <div className='border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0'></div>
-      <h3 className="text-xl font-bold text-white mb-3">☑️ Meet & Present Like a Pro</h3>
-     <p className="text-gray-300 text-sm text-left">
-  Host up to 100 participants (1,000 with upgrades) with presenter mode, audience chat, Q&A, and polls built in.
-</p>
+            {/* Feature Card */}
+            <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-right transition-all duration-300 hover:scale-105">
+              <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
+                <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
+                <div className="z-10 bg-purple-100 p-4 rounded-full">
+                  <LockClosedIcon className="h-10 w-10 text-[#5a4ded]" />
+                </div>
+              </div>
+              <div className=" p-6 text-center overflow-hidden relative">
+                <div className="border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0"></div>
+                <h3 className="text-xl font-bold text-white mb-3">
+                  ☑️ Enterprise-Grade Security
+                </h3>
+                <p className="text-gray-300 text-sm text-left">
+                  End-to-end encrypted meetings with advanced host controls,
+                  waiting rooms, and role-based team management.
+                </p>
+              </div>
+            </div>
 
-    </div>
-  </div>
+            {/* Feature Card */}
+            <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-left transition-all duration-300 hover:scale-105">
+              <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
+                <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
+                <div className="z-10 bg-red-100 p-4 rounded-full">
+                  <VideoCameraIcon className="h-10 w-10 text-[#5a4ded]" />
+                </div>
+              </div>
+              <div className=" p-6 text-center relative overflow-hidden">
+                <div className="border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0"></div>
+                <h3 className="text-xl font-bold text-white mb-3">
+                  ☑️ Crystal Clear Video & Audio
+                </h3>
+                <p className="text-gray-300 text-sm text-left">
+                  Enjoy adaptive HD video, echo cancellation, and noise
+                  suppression — smooth on any device or network.
+                </p>
+              </div>
+            </div>
 
-  {/* Feature Card */}
-  <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-right transition-all duration-300 hover:scale-105">
-    <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
-      <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
-      <div className="z-10 bg-purple-100 p-4 rounded-full">
-        <LockClosedIcon className="h-10 w-10 text-[#5a4ded]" />
-      </div>
-    </div>
-    <div className=" p-6 text-center overflow-hidden relative">
-      <div className='border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0'></div>
-      <h3 className="text-xl font-bold text-white mb-3">☑️ Enterprise-Grade Security</h3>
-      <p className="text-gray-300 text-sm text-left">
-  End-to-end encrypted meetings with advanced host controls, waiting rooms, and role-based team management.
-</p>
-
-    </div>
-  </div>
-
-  {/* Feature Card */}
-  <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-left transition-all duration-300 hover:scale-105">
-    <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
-      <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
-      <div className="z-10 bg-red-100 p-4 rounded-full">
-        <VideoCameraIcon className="h-10 w-10 text-[#5a4ded]" />
-      </div>
-    </div>
-    <div className=" p-6 text-center relative overflow-hidden">
-      <div className='border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0'></div>
-      <h3 className="text-xl font-bold text-white mb-3">☑️ Crystal Clear Video & Audio</h3>
-      <p className="text-gray-300 text-sm text-left">
-  Enjoy adaptive HD video, echo cancellation, and noise suppression — smooth on any device or network.
-</p>
-
-    </div>
-  </div>
-
-  {/* Feature Card */}
-  <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-right transition-all duration-300 hover:scale-105">
-    <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
-      <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
-      <div className="z-10 bg-yellow-100 p-4 rounded-full">
-        <BoltIcon className="h-10 w-10 text-[#5a4ded]" />
-      </div>
-    </div>
-    <div className=" p-6 text-center relative overflow-hidden">
-      <div className='border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0'></div>
-      <h3 className="text-xl font-bold text-white mb-3">☑️ Instant, Intuitive, Integrated</h3>
-      <p className="text-gray-300 text-sm text-left">
-  1-click scheduling with instant join links, seamless integration with Google Calendar, Outlook, and Slack — no downloads needed, just open in your browser.
-</p>
-
-    </div>
-  </div>
-</div>
-
+            {/* Feature Card */}
+            <div className="group relative bg-[#ffffff10] rounded-3xl overflow-hidden shadow-lg backdrop-blur-md border border-white/10 slide-in-right transition-all duration-300 hover:scale-105">
+              <div className="py-10 flex items-center justify-center bg-[#5a4ded] relative opacity-70">
+                <div className="absolute inset-0 rounded-t-3xl bg-white/10 animate-pulse blur-2xl opacity-30" />
+                <div className="z-10 bg-yellow-100 p-4 rounded-full">
+                  <BoltIcon className="h-10 w-10 text-[#5a4ded]" />
+                </div>
+              </div>
+              <div className=" p-6 text-center relative overflow-hidden">
+                <div className="border-[10px] border-purple-700 blur-[20px] opacity-100 absolute w-[90%] top-0"></div>
+                <h3 className="text-xl font-bold text-white mb-3">
+                  ☑️ Instant, Intuitive, Integrated
+                </h3>
+                <p className="text-gray-300 text-sm text-left">
+                  1-click scheduling with instant join links, seamless
+                  integration with Google Calendar, Outlook, and Slack — no
+                  downloads needed, just open in your browser.
+                </p>
+              </div>
+            </div>
+          </div>
 
           <div
             ref={stepsRef}
@@ -268,7 +277,8 @@ function LandingPage() {
           >
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                🗒️ <span className='text-[#5a4ded]'>Simple</span> and <span className='text-[#5a4ded]'>Seamless</span> Collaboration
+                🗒️ <span className="text-[#5a4ded]">Simple</span> and{' '}
+                <span className="text-[#5a4ded]">Seamless</span> Collaboration
               </h2>
               <p className="text-xl text-white max-w-2xl mx-auto">
                 Get Started in 3 Simple Steps
@@ -343,69 +353,70 @@ function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {/* Teams & Startups */}
               <div className="bg-[#272a2c] p-6 rounded-lg shadow-md text-center slide-in-left transition-transform duration-300 hover:scale-125 hover:shadow-lg overflow-hidden">
-                <div className='h-32 w-32 absolute bg-purple-400 top-0 left-0 rounded-r-full blur-[100px] opacity-80'></div>
+                <div className="h-32 w-32 absolute bg-purple-400 top-0 left-0 rounded-r-full blur-[100px] opacity-80"></div>
                 <div className="bg-purple-100 p-4 rounded-full mb-5 inline-block">
                   <UserGroupIcon className="h-8 w-8 text-purple-600" />
                 </div>
-                <div className='border-t-2 py-5'>
+                <div className="border-t-2 py-5">
                   <h3 className="text-xl  font-semibold text-white mb-2">
-                  ✅ Teams & Startups
-                </h3>
-                <p className="text-purple-200">
-                  Keep everyone aligned, from morning standups to global syncs.
-                </p>
+                    ✅ Teams & Startups
+                  </h3>
+                  <p className="text-purple-200">
+                    Keep everyone aligned, from morning standups to global
+                    syncs.
+                  </p>
                 </div>
               </div>
 
               {/* Educators & Trainers */}
               <div className="bg-[#272a2c] p-6 rounded-lg shadow-md text-center slide-in-bottom transition-transform duration-300 hover:scale-125 hover:shadow-lg overflow-hidden">
-                <div className='h-32 w-32 absolute bg-purple-400 top-0 left-0 rounded-r-full blur-[100px] opacity-80'></div> 
+                <div className="h-32 w-32 absolute bg-purple-400 top-0 left-0 rounded-r-full blur-[100px] opacity-80"></div>
                 <div className="bg-yellow-100 p-4 rounded-full mb-5 inline-block">
                   <BriefcaseIcon className="h-8 w-8 text-yellow-600" />
                 </div>
-               <div className='border-t-2 py-5'>
-                 <h3 className="text-xl font-semibold text-white mb-2">
-                  🎓 Educators & Trainers
-                </h3>
-                <p className="text-purple-200">
-                  Deliver live courses, engage students, and share resources in
-                  real-time.
-                </p>
-               </div>
+                <div className="border-t-2 py-5">
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    🎓 Educators & Trainers
+                  </h3>
+                  <p className="text-purple-200">
+                    Deliver live courses, engage students, and share resources
+                    in real-time.
+                  </p>
+                </div>
               </div>
 
               {/* Enterprises & Consultancies */}
               <div className="bg-[#272a2c] p-6 rounded-lg shadow-md text-center slide-in-bottom transition-transform duration-300 hover:scale-125 hover:shadow-lg overflow-hidden">
-                <div className='h-32 w-32 absolute bg-purple-400 top-0 left-0 rounded-r-full blur-[100px] opacity-80'></div>
+                <div className="h-32 w-32 absolute bg-purple-400 top-0 left-0 rounded-r-full blur-[100px] opacity-80"></div>
                 <div className="bg-green-100 p-4 rounded-full mb-5 inline-block">
                   <BriefcaseIcon className="h-8 w-8 text-green-600" />
                 </div>
-                <div className='border-t-2 py-5'>
+                <div className="border-t-2 py-5">
                   <h3 className="text-xl font-semibold text-white mb-2">
-                  💼 Enterprises & Consultancies
-                </h3>
-                <p className="text-purple-200">
-                  Secure collaboration, client onboarding, and executive
-                  briefings — all in one place.
-                </p>
+                    💼 Enterprises & Consultancies
+                  </h3>
+                  <p className="text-purple-200">
+                    Secure collaboration, client onboarding, and executive
+                    briefings — all in one place.
+                  </p>
                 </div>
               </div>
 
               {/* Creators & Speakers */}
               <div className="bg-[#272a2c] p-6 rounded-lg shadow-md text-center slide-in-right transition-transform duration-300 hover:scale-125 hover:shadow-lg overflow-hidden">
-                <div className='h-32 w-32 absolute bg-purple-400 top-0 left-0 rounded-r-full blur-[100px] opacity-80'></div>
+                <div className="h-32 w-32 absolute bg-purple-400 top-0 left-0 rounded-r-full blur-[100px] opacity-80"></div>
                 <div className="bg-red-100 p-4 rounded-full mb-5 inline-block">
                   <MicrophoneIcon className="h-8 w-8 text-red-600" />
                 </div>
-               <div className='border-t-2 py-5'>
-                 <h3 className="text-xl font-semibold text-white mb-2">
-                  🎤 Creators & Speakers
-                </h3>
-                <p className="text-purple-200">
-                  Go live with large audiences, host Q&As, and grow your brand
-                  with impactful webinars.
-                </p>
-               </div>
+                <div className="border-t-2 py-5">
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    🎤 Creators & Speakers
+                  </h3>
+                  <p className="text-purple-200">
+                    Go live with large audiences, host Q&As, and grow your brand
+                    with impactful webinars.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -430,7 +441,9 @@ function LandingPage() {
               <div className="p-8 bg-[#272a2c] rounded-2xl shadow-lg hover:shadow-2xl transition-shadow slide-in-left">
                 <div className="flex items-center mb-6">
                   <div className="w-16 h-16 bg-purple-200 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-2xl font-bold text-purple-600">1</span>
+                    <span className="text-2xl font-bold text-purple-600">
+                      1
+                    </span>
                   </div>
                   <div>
                     <h4 className="text-lg font-semibold text-purple-400">
@@ -484,7 +497,9 @@ function LandingPage() {
                     className="w-10 h-10 rounded-full mr-3"
                   />
                   <div>
-                    <p className="font-semibold text-purple-400">Dr. Raj Patel</p>
+                    <p className="font-semibold text-purple-400">
+                      Dr. Raj Patel
+                    </p>
                     <p className="text-gray-200 text-sm">Online Instructor</p>
                   </div>
                 </div>
@@ -803,8 +818,6 @@ function LandingPage() {
                 anytime.
               </p>
             </div>
-
-       
 
             <AllSubscriptions />
           </div>

@@ -84,6 +84,10 @@ const userSchema = new mongoose.Schema({
   ]
 
   ,
+
+  phone: { type: String },
+company: { type: String },
+
   recordings: [
     {
       roomId: { type: String },

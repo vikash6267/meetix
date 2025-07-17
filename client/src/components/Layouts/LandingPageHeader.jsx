@@ -111,7 +111,7 @@ const LandingPageHeader = () => {
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center space-x-4">
                 <div className="relative">
-                   { <button
+                   {storedUser && <button
                         onClick={() => setIsMeetDropdownOpen(!isMeetDropdownOpen)}
                         className="flex items-center text-white hover:text-blue-600 font-medium"
                     >
@@ -138,9 +138,9 @@ const LandingPageHeader = () => {
                                 {/* <button onClick={handleMeetingAction} className="w-full text-black px-4 py-2 font-medium mb-2 text-center">
                                     Join Meeting
                                     </button> */}
-                                <button onClick={handleMeetingAction} className="w-full text-black px-4 py-2 font-medium mb-2 text-center">
+                                {/* <button onClick={handleMeetingAction} className="w-full text-black px-4 py-2 font-medium mb-2 text-center">
                                     Join Meeting
-                                </button>
+                                </button> */}
                                 {/* </ConnectButton> */}
                             </div>
                         </div>

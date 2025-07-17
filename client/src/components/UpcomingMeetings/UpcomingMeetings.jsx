@@ -269,13 +269,13 @@ const UpcomingMeetingPage = () => {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header toggleSidebar={toggleSidebar} name="Upcoming Meetings" />
+        <Header toggleSidebar={toggleSidebar} name=" Meetings" />
 
         <div className="flex-1 overflow-auto p-6">
           <div className="mb-6 flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
-                Your Upcoming Meetings
+                Your  Meetings
               </h2>
               <p className="text-gray-600 mt-1">
                 Manage and join your scheduled meetings

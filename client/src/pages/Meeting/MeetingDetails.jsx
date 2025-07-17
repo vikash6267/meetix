@@ -166,7 +166,7 @@ const MeetingDetails = () => {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header toggleSidebar={toggleSidebar} name="Session History" />
+        <Header toggleSidebar={toggleSidebar} name="Meeting  History" />
 
         <div className="flex-1 overflow-auto p-6 space-y-6">
           {/* Search and Filter Controls */}

@@ -5,6 +5,7 @@ import axios from "axios"
 import Sidebar from "../../components/Layouts/SideNav"
 import Header from "../../components/Layouts/SidebarHeader"
 import { BASE_URL } from "../../services/apis"
+import RoleChangePopup from "./RoleChangePopup"
 
 const EnhancedUserDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -664,34 +665,8 @@ console.log(filterType)
                     </p>
                   </div>
 
-                  <div className="mt-4">
-  <label className="block text-sm font-medium text-gray-700 mb-1">Change Role</label>
-  <select
-    className="border border-gray-300 rounded px-3 py-2 text-sm"
-    value={selectedUser?.isAdmin === "true" ? "admin" : "user"}
-    onChange={async (e) => {
-      const newRole = e.target.value;
-      try {
-        const res = await axios.post(`https://meetix.mahitechnocrafts.in/api/v1/user/set-role`, {
-          userId: selectedUser._id,
-          role: newRole,
-        });
-      
-        // Update UI locally (optional)
-        setSelectedUser((prev) => ({
-          ...prev,
-          isAdmin: newRole === "admin" ? "true" : "false",
-        }));
-      } catch (err) {
-        console.error("Role Update Error:", err);
-       
-      }
-    }}
-  >
-    <option value="user">User</option>
-    <option value="admin">Admin</option>
-  </select>
-</div>
+ <RoleChangePopup selectedUser={selectedUser} setSelectedUser={setSelectedUser} />
+
 
                 </div>
 

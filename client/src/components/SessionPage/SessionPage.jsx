@@ -52,7 +52,7 @@ const SessionPage = () => {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header toggleSidebar={toggleSidebar} name="Session History" />
+        <Header toggleSidebar={toggleSidebar} name="Meeting  History" />
         
         <div className="flex-1 overflow-auto p-8">
           <div className="max-w-3xl mx-auto">
@@ -80,7 +80,7 @@ const SessionPage = () => {
             {sessions.length > 0 ? (
               <div className="bg-white rounded-lg shadow-lg p-6">
                 <h2 className="text-2xl font-semibold mb-6">
-                  Session History: {sessionId}
+                  Meeting  History: {sessionId}
                 </h2>
                 <div className="space-y-4">
                   {sessions.map((session) => (

@@ -5,6 +5,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import AllSubscriptions from '../common/AllSubscription';
 dayjs.extend(relativeTime);
 
 const SubscripationPage = () => {
@@ -15,25 +16,25 @@ const SubscripationPage = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const token = localStorage.getItem("authToken");
+  const token = localStorage.getItem('authToken');
 
   useEffect(() => {
     const fetchSubscriptions = async () => {
       try {
         const { data } = await axios.post(
-          "https://meetix.mahitechnocrafts.in/api/v1/subscription/my-subscriptions",
+          'https://meetix.mahitechnocrafts.in/api/v1/subscription/my-subscriptions',
           {},
           {
             headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
         setSubscriptions(data?.subscriptions || []);
       } catch (error) {
         console.error(error?.response?.data || error?.message || error);
         toast.error(
-          error?.response?.data?.message || "Failed to fetch subscriptions."
+          error?.response?.data?.message || 'Failed to fetch subscriptions.',
         );
       }
     };
@@ -42,15 +43,18 @@ const SubscripationPage = () => {
   }, [token]);
 
   const getStatusBadge = (isActive) => (
-    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-      isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
-    }`}>
+    <span
+      className={`text-xs font-semibold px-3 py-1 rounded-full ${
+        isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
+      }`}
+    >
       {isActive ? 'Active' : 'Expired'}
     </span>
   );
 
   const formatDate = (date) => dayjs(date).format('DD MMM YYYY');
-  const daysBetween = (from, to) => Math.ceil(dayjs(to).diff(dayjs(from), 'day'));
+  const daysBetween = (from, to) =>
+    Math.ceil(dayjs(to).diff(dayjs(from), 'day'));
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -60,11 +64,16 @@ const SubscripationPage = () => {
 
         <div className="flex-1 overflow-auto p-6 md:p-10">
           <div className="max-w-5xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">My Subscriptions</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">
+              My Subscriptions
+            </h1>
 
             {subscriptions?.length === 0 ? (
               <div className="bg-white p-8 rounded-lg shadow text-center">
                 <p className="text-lg text-gray-600">No subscriptions found.</p>
+
+
+                <AllSubscriptions />
               </div>
             ) : (
               <div className="space-y-6">
@@ -86,7 +95,9 @@ const SubscripationPage = () => {
                           <h2 className="text-2xl font-semibold text-gray-800">
                             {sub?.service?.type || 'Unknown Plan'}
                           </h2>
-                          <p className="text-sm text-gray-500 mt-1">{getStatusBadge(sub?.isActive)}</p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {getStatusBadge(sub?.isActive)}
+                          </p>
                         </div>
 
                         <div className="text-right">
@@ -98,20 +109,30 @@ const SubscripationPage = () => {
 
                       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-700">
                         <div>
-                          <p className="font-medium text-gray-600">Subscribed On</p>
+                          <p className="font-medium text-gray-600">
+                            Subscribed On
+                          </p>
                           <p>{formatDate(enrollDate)}</p>
-                          <p className="text-xs text-gray-500">{dayjs(enrollDate).fromNow()}</p>
+                          <p className="text-xs text-gray-500">
+                            {dayjs(enrollDate).fromNow()}
+                          </p>
                         </div>
 
                         <div>
-                          <p className="font-medium text-gray-600">Days Since Subscribed</p>
+                          <p className="font-medium text-gray-600">
+                            Days Since Subscribed
+                          </p>
                           <p>{daysSinceEnroll} days</p>
                         </div>
 
                         <div>
-                          <p className="font-medium text-gray-600">Expires On</p>
+                          <p className="font-medium text-gray-600">
+                            Expires On
+                          </p>
                           <p>{formatDate(expireDate)}</p>
-                          <p className={`text-xs ${isExpired ? 'text-red-500' : 'text-gray-500'}`}>
+                          <p
+                            className={`text-xs ${isExpired ? 'text-red-500' : 'text-gray-500'}`}
+                          >
                             {isExpired
                               ? `${Math.abs(daysToExpire)} days ago`
                               : `in ${daysToExpire} days`}
@@ -119,16 +140,16 @@ const SubscripationPage = () => {
                         </div>
                       </div>
 
-                   {isExpired && (
-  <button
-    onClick={() => toast.info("Renew feature coming soon.")}
-    className="mt-6 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-md transition"
-  >
-    Renew Plan
-  </button>
-)}
-
-
+                      {isExpired && (
+                        <button
+                          onClick={() =>
+                            toast.info('Renew feature coming soon.')
+                          }
+                          className="mt-6 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-md transition"
+                        >
+                          Renew Plan
+                        </button>
+                      )}
                     </div>
                   );
                 })}

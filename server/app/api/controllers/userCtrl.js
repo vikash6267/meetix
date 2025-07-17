@@ -45,6 +45,7 @@ const emailHTML = meetingTemplate({
   scheduleDateTime,
   shortSummary,
   roomId,
+  userId
 });
 
 // Send email to all participants
@@ -123,6 +124,7 @@ exports.updateUpcomingMeeting = async (req, res) => {
         scheduleDateTime: meeting.scheduleDateTime,
         shortSummary: meeting.shortSummary,
         roomId: meeting.roomId,
+        userId
       });
 
       const recipientList = meeting.participants || []; // fallback if not sent from frontend
@@ -348,5 +350,67 @@ exports.sendMeetingInvite = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Failed to send email.' });
+  }
+};
+
+
+// @desc: Check if a user has joined a specific meeting
+// @route: GET /api/meeting/check/:userId/:roomId
+
+exports.checkIfUserJoinedMeeting = async (req, res) => {
+  try {
+    const { userId, roomId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Find the meeting in user's upcoming meetings by roomId
+    const meeting = user.upCommingMeetings.find(
+      (meet) => meet.roomId.toString() === roomId.toString()
+    );
+
+    if (!meeting) {
+      return res.status(404).json({ success: false, message: "Meeting not found for this user" });
+    }
+
+    // Respond based on the isJoined field
+    return res.status(200).json({
+      success: true,
+      isJoined: meeting.isJoined === true, // force return true/false
+    });
+
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+exports.updateProfile = async (req, res) => {
+  try {
+    const { userId, username, phone, company } = req.body;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.username = username || user.username;
+    user.phone = phone || user.phone;
+    user.company = company || user.company;
+
+    await user.save();
+    res.json({ message: "Profile updated successfully!" });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating profile" });
+  }
+};
+
+exports.getProfile = async (req, res) => {
+  try {
+    console.log(req.params)
+    const user = await User.findById(req.params.id).select('-password'); // exclude password
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user);
+  } catch (error) {
+    console.error('Get Profile Error:', error);
+    res.status(500).json({ message: 'Server Error' });
   }
 };
