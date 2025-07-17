@@ -159,7 +159,7 @@ const AllSubscriptions = () => {
                 ))}
               </ul>
               <button
-                onClick={() => handleSubscribe(plan)}
+                onClick={() => handleSubscribe(plan.service)}
                 className={`w-full ${buttonClasses(
                   plan.type
                 )} text-white py-3 px-4 rounded-md transition duration-300 mt-auto disabled:opacity-50 disabled:cursor-not-allowed`}
