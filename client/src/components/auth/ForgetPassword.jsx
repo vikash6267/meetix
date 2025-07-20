@@ -23,7 +23,7 @@ const ForgotPassword = () => {
         setIsLoading(true);
         try {
             const response = await fetch(
-                'https://webinar-backend-sa37.onrender.com/api/v1/send-otp',
+                'https://meetix.mahitechnocrafts.in/api/v1/user/send-otp',
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -76,7 +76,7 @@ const ForgotPassword = () => {
         setIsLoading(true);
         try {
             const response = await fetch(
-                'https://webinar-backend-sa37.onrender.com/api/v1/verify-otp',
+                'https://meetix.mahitechnocrafts.in/api/v1/user/verify-otp',
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -112,7 +112,7 @@ const ForgotPassword = () => {
         setIsLoading(true);
         try {
             const response = await fetch(
-                'https://webinar-backend-sa37.onrender.com/api/v1/users/forget-password',
+                'https://meetix.mahitechnocrafts.in/api/v1/user/reset-password',
                 {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },

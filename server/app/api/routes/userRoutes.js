@@ -13,7 +13,7 @@ const {
   getProfile,
 } = require("../controllers/userCtrl");
 const User = require("../models/User");
-const { sendOtp, verifyOtp } = require("../controllers/otpCtrl");
+const { sendOtp, verifyOtp, resetPassword } = require("../controllers/otpCtrl");
 const bcrypt = require('bcrypt');
 const OTP = require("../models/OTP");
 
@@ -247,6 +247,7 @@ router.get('/room-activity/:id', async (req, res) => {
 
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);
+router.patch("/reset-password", resetPassword);
 
 
 
