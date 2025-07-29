@@ -1207,7 +1207,7 @@ handleSilentRecordingUploaded(data) {
 }
 
 
-    processSilentRecording() {
+async processSilentRecording() {
     console.log(`📂 Processing silent recording... Chunks: ${this.silentRecordedChunks.length}`);
 
     if (this.silentRecordedChunks.length === 0) {
@@ -1216,24 +1216,35 @@ handleSilentRecordingUploaded(data) {
     }
 
     try {
+        // 🎙️ Recorded chunks को Blob में बदलना
         const blob = new Blob(this.silentRecordedChunks, { type: "audio/webm" });
         console.log(`✅ Silent recording blob created: ${blob.size} bytes`);
 
-        // 📥 DOWNLOAD FILE IN BROWSER
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.style.display = "none";
-        a.href = url;
-        a.download = `silent_recording_${Date.now()}.webm`;
-        document.body.appendChild(a);
-        a.click();
-        console.log("📥 Silent recording downloaded automatically");
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        // 🏷️ Server पर भेजने के लिए FormData बनाएँ
+        const formData = new FormData();
+        formData.append("audio", blob, `silent_recording_${Date.now()}.webm`);
+        formData.append("roomId", this.room_id);
+        formData.append("peerId", this.peer_id);
+
+        console.log("⬆️ Uploading silent recording to server...");
+
+        // 🌍 Fetch API से server को भेजो
+        const response = await fetch("http://localhost:3010/save-silent-recording", {
+            method: "POST",
+            body: formData
+        });
+console.log(response)
+        const data = await response.json();
+        if (data.success) {
+            console.log(`✅ Silent recording uploaded successfully: ${data.filePath}`);
+        } else {
+            console.error(`❌ Upload failed: ${data.error}`);
+        }
     } catch (error) {
         console.error("❌ Error processing silent recording:", error);
     }
 }
+
 
 
     uploadSilentRecording(blob) {

@@ -511,38 +511,7 @@ function OIDCAuth(req, res, next) {
 
 
 
-app.post("/upload-silent-recording", upload.single("silentRecording"), (req, res) => {
-    try {
-        console.log("REQ BODY" ,req.body )
-        const { roomId, peerId } = req.body;
-        const buffer = req.file.buffer;  // Multer के जरिए file buffer
 
-        // ✅ Path बनाना
-        const recordingsDir = path.join(__dirname, "../recordings/summaries");
-        if (!fs.existsSync(recordingsDir)) {
-            fs.mkdirSync(recordingsDir, { recursive: true });
-        }
-
-        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-        const filename = `summary_${roomId}_${peerId}_${timestamp}.webm`;
-        const filePath = path.join(recordingsDir, filename);
-
-        // ✅ File save करना
-        fs.writeFileSync(filePath, buffer);
-
-        console.log(`✅ Silent recording saved: ${filePath}`);
-
-        res.json({
-            success: true,
-            filename,
-            filePath,
-            size: buffer.length,
-        });
-    } catch (error) {
-        console.error("❌ Silent recording upload failed:", error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
 
 
 function startServer() {
@@ -784,6 +753,31 @@ function startServer() {
         }
     });
 
+    app.post("/save-silent-recording", upload.single("audio"), (req, res) => {
+        try {
+            console.log("🎙️ Recording upload hit!");
+
+            const { roomId, peerId } = req.body;
+            const buffer = req.file.buffer;
+
+            // ✅ Directory बनाना
+            const dir = path.join(__dirname, "../recordings");
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+            // ✅ File name बनाना
+            const filename = `meeting_${roomId}_${peerId}_${Date.now()}.webm`;
+            const filepath = path.join(dir, filename);
+
+            // ✅ Save file
+            fs.writeFileSync(filepath, buffer);
+            console.log(`✅ Recording saved at: ${filepath}`);
+
+            res.json({ success: true, filename, filepath });
+        } catch (error) {
+            console.error("❌ Error saving recording:", error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
     // Handle Direct join room with params
     app.get('/join/', async (req, res) => {
         if (Object.keys(req.query).length > 0) {
@@ -1894,127 +1888,127 @@ function startServer() {
 
 
 
-      socket.on('join', async (dataObject, cb) => {
-    console.log("\n================== 📥 [JOIN EVENT RECEIVED] ==================");
-    console.log("👉 Incoming dataObject:", JSON.stringify(dataObject, null, 2));
+        socket.on('join', async (dataObject, cb) => {
+            console.log("\n================== 📥 [JOIN EVENT RECEIVED] ==================");
+            console.log("👉 Incoming dataObject:", JSON.stringify(dataObject, null, 2));
 
-    socket.room_id = dataObject.room_id;
-    console.log("✅ Room ID set on socket:", socket.room_id);
+            socket.room_id = dataObject.room_id;
+            console.log("✅ Room ID set on socket:", socket.room_id);
 
-    // 🔍 Room exists check
-    if (!roomExists(socket)) {
-        console.log("❌ Room does NOT exist:", socket.room_id);
-        return cb({ error: "Room does not exist" });
-    }
+            // 🔍 Room exists check
+            if (!roomExists(socket)) {
+                console.log("❌ Room does NOT exist:", socket.room_id);
+                return cb({ error: "Room does not exist" });
+            }
 
-    // ✅ Room join करवा socket को (IMPORTANT for io.to() to work)
-    socket.join(socket.room_id);
-    console.log("✅ Socket joined room:", socket.room_id);
+            // ✅ Room join करवा socket को (IMPORTANT for io.to() to work)
+            socket.join(socket.room_id);
+            console.log("✅ Socket joined room:", socket.room_id);
 
-    // 🔍 Check participant limits
-    const room = getRoom(socket);
-    const currentParticipants = room.getPeersCount();
-    console.log("👥 Current peers in room:", currentParticipants);
+            // 🔍 Check participant limits
+            const room = getRoom(socket);
+            const currentParticipants = room.getPeersCount();
+            console.log("👥 Current peers in room:", currentParticipants);
 
-    const limitCheck = await checkRoomParticipantLimit(socket.room_id, currentParticipants + 1);
-    console.log("📊 Limit Check:", limitCheck);
+            const limitCheck = await checkRoomParticipantLimit(socket.room_id, currentParticipants + 1);
+            console.log("📊 Limit Check:", limitCheck);
 
-    if (!limitCheck.allowed) {
-        console.log("❌ Join denied - limit exceeded:", {
-            roomId: socket.room_id,
-            currentParticipants: currentParticipants,
-            limit: limitCheck.limit,
+            if (!limitCheck.allowed) {
+                console.log("❌ Join denied - limit exceeded:", {
+                    roomId: socket.room_id,
+                    currentParticipants: currentParticipants,
+                    limit: limitCheck.limit,
+                });
+                return cb({
+                    error: "limitExceeded",
+                    message: limitCheck.message,
+                    limit: limitCheck.limit,
+                    currentParticipants: currentParticipants,
+                });
+            }
+
+            console.log("✅ Join allowed:", {
+                roomId: socket.room_id,
+                currentParticipants: currentParticipants,
+                limit: limitCheck.limit,
+            });
+
+            // ✅ Peer data clean करो
+            const peer_ip = getIpSocket(socket);
+            console.log("🌍 Peer IP:", peer_ip);
+
+            if (config?.integrations?.IPLookup?.enabled && peer_ip != '::1') {
+                dataObject.peer_geo = await getPeerGeoLocation(peer_ip);
+                console.log("📍 Geo Location Added:", dataObject.peer_geo);
+            }
+
+            const data = checkXSS(dataObject);
+            console.log("🛡️ XSS cleaned data:", data);
+
+            // 🔐 Room name valid check
+            if (!Validator.isValidRoomName(socket.room_id)) {
+                console.log("❌ Invalid room name:", socket.room_id);
+                return cb('invalid');
+            }
+
+            // Peer info destructure
+            const { peer_name, peer_id, peer_uuid, peer_token, os_name, os_version, browser_name, browser_version } = data.peer_info;
+            console.log("🙋 Peer joined:", peer_name, "| Peer ID:", peer_id);
+
+            // 🚫 अगर banned है
+            if (room.isBanned(peer_uuid)) {
+                console.log("🚫 Peer is BANNED:", peer_name);
+                return cb('isBanned');
+            }
+
+            // ✅ Room में peer add करो
+            console.log("➕ Adding Peer to room...");
+            room.addPeer(new Peer(socket.id, data));
+
+            console.log("📈 initSockets", room.getPeersCount());
+
+            // 🎙 Silent Recording Logic
+            if (room.getPeersCount() == 1) {
+                console.log("🎯 2nd peer joined – emitting SilentRecordingCommand (START)");
+
+                io.to(socket.room_id).emit("silentRecordingCommand", {
+                    action: "start",
+                    roomId: socket.room_id,
+                    purpose: "summary_generation"
+                });
+
+                console.log("✅ SilentRecordingCommand EMITTED to room:", socket.room_id);
+            } else {
+                console.log(`ℹ️ Peers count is ${room.getPeersCount()}, silent recording not started.`);
+            }
+
+            // ✅ Save attendee info
+            const Attendee = require('../api/models/Attendee.js');
+            const isPeerHost = room.getPeersCount() === 1;
+
+            const newAttendee = new Attendee({
+                roomId: socket.room_id,
+                peerName: data.peer_info.peer_name,
+                peerId: socket.id,
+                joinTime: new Date(),
+                isHost: isPeerHost,
+            });
+            await newAttendee.save();
+            console.log("📝 Attendee saved to DB:", peer_name);
+
+            // ✅ Active rooms log
+            const activeRooms = getActiveRooms();
+            console.log("📋 Active Rooms:", activeRooms);
+
+            const activeStreams = getRTMPActiveStreams();
+            console.log("📺 Active RTMP Streams:", activeStreams);
+
+            // ✅ बाकी का logic वही रहेगा...
+
+            console.log("================== ✅ JOIN EVENT COMPLETED ==================\n");
+
+            cb(room.toJson());
         });
-        return cb({
-            error: "limitExceeded",
-            message: limitCheck.message,
-            limit: limitCheck.limit,
-            currentParticipants: currentParticipants,
-        });
-    }
-
-    console.log("✅ Join allowed:", {
-        roomId: socket.room_id,
-        currentParticipants: currentParticipants,
-        limit: limitCheck.limit,
-    });
-
-    // ✅ Peer data clean करो
-    const peer_ip = getIpSocket(socket);
-    console.log("🌍 Peer IP:", peer_ip);
-
-    if (config?.integrations?.IPLookup?.enabled && peer_ip != '::1') {
-        dataObject.peer_geo = await getPeerGeoLocation(peer_ip);
-        console.log("📍 Geo Location Added:", dataObject.peer_geo);
-    }
-
-    const data = checkXSS(dataObject);
-    console.log("🛡️ XSS cleaned data:", data);
-
-    // 🔐 Room name valid check
-    if (!Validator.isValidRoomName(socket.room_id)) {
-        console.log("❌ Invalid room name:", socket.room_id);
-        return cb('invalid');
-    }
-
-    // Peer info destructure
-    const { peer_name, peer_id, peer_uuid, peer_token, os_name, os_version, browser_name, browser_version } = data.peer_info;
-    console.log("🙋 Peer joined:", peer_name, "| Peer ID:", peer_id);
-
-    // 🚫 अगर banned है
-    if (room.isBanned(peer_uuid)) {
-        console.log("🚫 Peer is BANNED:", peer_name);
-        return cb('isBanned');
-    }
-
-    // ✅ Room में peer add करो
-    console.log("➕ Adding Peer to room...");
-    room.addPeer(new Peer(socket.id, data));
-
-    console.log("📈 initSockets", room.getPeersCount());
-
-    // 🎙 Silent Recording Logic
-    if (room.getPeersCount() == 1) {
-        console.log("🎯 2nd peer joined – emitting SilentRecordingCommand (START)");
-
-        io.to(socket.room_id).emit("silentRecordingCommand", {
-            action: "start",
-            roomId: socket.room_id,
-            purpose: "summary_generation"
-        });
-
-        console.log("✅ SilentRecordingCommand EMITTED to room:", socket.room_id);
-    } else {
-        console.log(`ℹ️ Peers count is ${room.getPeersCount()}, silent recording not started.`);
-    }
-
-    // ✅ Save attendee info
-    const Attendee = require('../api/models/Attendee.js');
-    const isPeerHost = room.getPeersCount() === 1;
-
-    const newAttendee = new Attendee({
-        roomId: socket.room_id,
-        peerName: data.peer_info.peer_name,
-        peerId: socket.id,
-        joinTime: new Date(),
-        isHost: isPeerHost,
-    });
-    await newAttendee.save();
-    console.log("📝 Attendee saved to DB:", peer_name);
-
-    // ✅ Active rooms log
-    const activeRooms = getActiveRooms();
-    console.log("📋 Active Rooms:", activeRooms);
-
-    const activeStreams = getRTMPActiveStreams();
-    console.log("📺 Active RTMP Streams:", activeStreams);
-
-    // ✅ बाकी का logic वही रहेगा...
-
-    console.log("================== ✅ JOIN EVENT COMPLETED ==================\n");
-
-    cb(room.toJson());
-});
 
 
         socket.on('disconnect', async (reason) => {
@@ -2146,7 +2140,7 @@ function startServer() {
             }
 
             room.removePeer(socket.id);
-            if (room.getPeersCount() === 0) {
+            if (room.getPeersCount() === 1) {
                 io.to(socket.room_id).emit("silentRecordingCommand", {
                     action: "stop",
                     roomId: socket.room_id,
@@ -2157,7 +2151,7 @@ function startServer() {
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
-            if (room.getPeersCount() === 0) {
+            if (room.getPeersCount() === 1) {
                 //
                 stopRTMPActiveStreams(isPresenter, room);
                 const roomId = socket.room_id;
