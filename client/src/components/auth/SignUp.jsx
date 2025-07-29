@@ -542,7 +542,7 @@ const SignUp = () => {
     // Send OTP request logic
     try {
       const response = await fetch(
-        "https://meetix.mahitechnocrafts.in/api/v1/user/send-otp",
+        "http://localhost:3010/api/v1/user/send-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -570,7 +570,7 @@ const SignUp = () => {
 
     try {
       const response = await fetch(
-        "https://meetix.mahitechnocrafts.in/api/v1/user/verify-otp",
+        "http://localhost:3010/api/v1/user/verify-otp",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -612,7 +612,7 @@ const SignUp = () => {
 
     try {
       const response = await fetch(
-        "https://meetix.mahitechnocrafts.in/register",
+        "http://localhost:3010/register",
         {
           method: "POST",
           headers: {

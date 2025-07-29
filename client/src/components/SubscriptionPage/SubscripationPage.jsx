@@ -36,7 +36,7 @@ const SubscriptionPage = () => {
       try {
         setLoading(true);
         const { data } = await axios.post(
-          'https://meetix.mahitechnocrafts.in/api/v1/subscription/my-subscriptions',
+          'http://localhost:3010/api/v1/subscription/my-subscriptions',
           {},
           {
             headers: {
@@ -80,7 +80,7 @@ const SubscriptionPage = () => {
       console.log('📦 Creating subscription for plan:', plan);
 
       const response = await axios.post(
-        'https://meetix.mahitechnocrafts.in/api/v1/subscription/create',
+        'http://localhost:3010/api/v1/subscription/create',
         {
           subscriptionId: plan._id,
           redirectUrl: `https://www.mahitechnocrafts.in/payment-success?subscriptionId=${plan._id}`,

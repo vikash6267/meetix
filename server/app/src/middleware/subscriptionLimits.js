@@ -10,7 +10,7 @@ async function checkUserSubscriptionLimits(userId) {
     const user = await User.findById(userId).populate("subscriptions.service")
 
     if (!user) {
-      return { hasSubscription: false, type: "none", limit: 2 }
+      return { hasSubscription: false, type: "none", limit: 20 }
     }
 
     // Check for active subscriptions
@@ -20,12 +20,12 @@ async function checkUserSubscriptionLimits(userId) {
     )
 
     if (!activeSubscription) {
-      return { hasSubscription: false, type: "none", limit: 2 }
+      return { hasSubscription: false, type: "none", limit: 20 }
     }
 
     // Get subscription type and set limits
     const subscriptionType = activeSubscription.service.type.toLowerCase()
-    let limit = 2 // default
+    let limit = 20 // default
 
     switch (subscriptionType) {
       case "pro":
@@ -35,7 +35,7 @@ async function checkUserSubscriptionLimits(userId) {
         limit = 200
         break
       default:
-        limit = 2
+        limit = 20
     }
 
     return {
@@ -45,7 +45,7 @@ async function checkUserSubscriptionLimits(userId) {
     }
   } catch (error) {
     console.error("Error checking subscription limits:", error)
-    return { hasSubscription: false, type: "none", limit: 2 }
+    return { hasSubscription: false, type: "none", limit: 20 }
   }
 }
 
@@ -93,7 +93,7 @@ async function checkRoomParticipantLimit(roomId, currentParticipants) {
       return {
         allowed: false,
         message: "Room host not found",
-        limit: 2,
+        limit: 20,
       }
     }
 
@@ -126,7 +126,7 @@ async function checkRoomParticipantLimit(roomId, currentParticipants) {
     return {
       allowed: false,
       message: "Error checking room limits",
-      limit: 2,
+      limit: 20,
     }
   }
 }

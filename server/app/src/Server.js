@@ -4,7 +4,7 @@
 ███████ ███████ ██████  ██    ██ ███████ ██████  
 ██      ██      ██   ██ ██    ██ ██      ██   ██ 
 ███████ █████   ██████  ██    ██ █████   ██████  
-     ██ ██      ██   ██  ██  ██  ██      ██   ██ 
+     ██ ██      ██   ██  ██  ██  ██      ██   ██ 
 ███████ ███████ ██   ██   ████   ███████ ██   ██                                           
 
 prod dependencies: {
@@ -125,9 +125,9 @@ const containerClient = blobServiceClient.getContainerClient(containerName);
 
 // AWS 
 const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
 });
 
 
@@ -309,62 +309,62 @@ if (rtmpEnabled) {
 
 // ⏰ Runs every 1 minute
 cron.schedule("* * * * *", async () => {
-  console.log(`[CRON] Running meeting notifier at ${new Date().toLocaleString()}`);
+    console.log(`[CRON] Running meeting notifier at ${new Date().toLocaleString()}`);
 
-  try {
-    const users = await User.find({ "upCommingMeetings.0": { $exists: true } });
+    try {
+        const users = await User.find({ "upCommingMeetings.0": { $exists: true } });
 
-    const now = new Date();
+        const now = new Date();
 
-    for (const user of users) {
-      let updated = false;
+        for (const user of users) {
+            let updated = false;
 
-      for (const meeting of user.upCommingMeetings) {
-        if (
-          !meeting.noti30min &&
-          !meeting.isCancelled &&
-          !meeting.isJoined
-        ) {
-          const timeDiff = (new Date(meeting.scheduleDateTime) - now) / 60000;
+            for (const meeting of user.upCommingMeetings) {
+                if (
+                    !meeting.noti30min &&
+                    !meeting.isCancelled &&
+                    !meeting.isJoined
+                ) {
+                    const timeDiff = (new Date(meeting.scheduleDateTime) - now) / 60000;
 
-          if (timeDiff <= 30 && timeDiff > 0) {
-            const emailHTML = remindermeetingTemplate({
-              type: "reminder",
-              meetingName: meeting.meetingName,
-              scheduleDateTime: meeting.scheduleDateTime,
-              shortSummary: meeting.shortSummary,
-              roomId: meeting.roomId,
-            });
+                    if (timeDiff <= 30 && timeDiff > 0) {
+                        const emailHTML = remindermeetingTemplate({
+                            type: "reminder",
+                            meetingName: meeting.meetingName,
+                            scheduleDateTime: meeting.scheduleDateTime,
+                            shortSummary: meeting.shortSummary,
+                            roomId: meeting.roomId,
+                        });
 
-            const subject = `🔔 Reminder: "${meeting.meetingName}" starts in ${Math.floor(timeDiff)} min`;
+                        const subject = `🔔 Reminder: "${meeting.meetingName}" starts in ${Math.floor(timeDiff)} min`;
 
-            // 📨 1. Send to the user who owns the meeting
-            await mailSender(user.email, subject, emailHTML);
+                        // 📨 1. Send to the user who owns the meeting
+                        await mailSender(user.email, subject, emailHTML);
 
-            // 📨 2. Send to each participant
-            if (Array.isArray(meeting.participants)) {
-              for (const participantEmail of meeting.participants) {
-                if (participantEmail && participantEmail !== user.email) {
-                  await mailSender(participantEmail, subject, emailHTML);
+                        // 📨 2. Send to each participant
+                        if (Array.isArray(meeting.participants)) {
+                            for (const participantEmail of meeting.participants) {
+                                if (participantEmail && participantEmail !== user.email) {
+                                    await mailSender(participantEmail, subject, emailHTML);
+                                }
+                            }
+                        }
+
+                        // ✅ Mark as notified
+                        meeting.noti30min = true;
+                        updated = true;
+                    }
                 }
-              }
             }
 
-            // ✅ Mark as notified
-            meeting.noti30min = true;
-            updated = true;
-          }
+            if (updated) {
+                await user.save();
+                console.log(`✅ Updated user ${user.username} with notified meetings`);
+            }
         }
-      }
-
-      if (updated) {
-        await user.save();
-        console.log(`✅ Updated user ${user.username} with notified meetings`);
-      }
+    } catch (error) {
+        console.error("❌ CRON error in meeting notification:", error.message);
     }
-  } catch (error) {
-    console.error("❌ CRON error in meeting notification:", error.message);
-  }
 });
 // html views
 const views = {
@@ -382,7 +382,7 @@ const views = {
     loginLAlert: path.join(__dirname, '../../', 'public/views/LoginAlert.html'),
 };
 
-const filesPath = [views.landing, views.newRoom, views.room, views.login,views.loginLAlert]
+const filesPath = [views.landing, views.newRoom, views.room, views.login, views.loginLAlert]
 
 const htmlInjector = new HtmlInjector(filesPath, config.ui.brand);
 
@@ -506,6 +506,45 @@ function OIDCAuth(req, res, next) {
     }
 }
 
+
+
+
+
+
+app.post("/upload-silent-recording", upload.single("silentRecording"), (req, res) => {
+    try {
+        console.log("REQ BODY" ,req.body )
+        const { roomId, peerId } = req.body;
+        const buffer = req.file.buffer;  // Multer के जरिए file buffer
+
+        // ✅ Path बनाना
+        const recordingsDir = path.join(__dirname, "../recordings/summaries");
+        if (!fs.existsSync(recordingsDir)) {
+            fs.mkdirSync(recordingsDir, { recursive: true });
+        }
+
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const filename = `summary_${roomId}_${peerId}_${timestamp}.webm`;
+        const filePath = path.join(recordingsDir, filename);
+
+        // ✅ File save करना
+        fs.writeFileSync(filePath, buffer);
+
+        console.log(`✅ Silent recording saved: ${filePath}`);
+
+        res.json({
+            success: true,
+            filename,
+            filePath,
+            size: buffer.length,
+        });
+    } catch (error) {
+        console.error("❌ Silent recording upload failed:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
 function startServer() {
     // Start the app
     app.set('trust proxy', trustProxy); // Enables trust for proxy headers (e.g., X-Forwarded-For) based on the trustProxy setting
@@ -526,7 +565,7 @@ function startServer() {
     app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Handles URL-encoded payloads
     app.use(express.raw({ type: 'video/webm', limit: '50mb' })); // Handles raw binary data
     app.use(restApi.basePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
-app.use(cookieParser()); // to parse cookies
+    app.use(cookieParser()); // to parse cookies
 
     // IP Whitelist check ...
     app.use(restrictAccessByIP);
@@ -579,9 +618,9 @@ app.use(cookieParser()); // to parse cookies
 
             const config = OIDC.baseUrlDynamic
                 ? {
-                      ...OIDC.config,
-                      baseURL,
-                  }
+                    ...OIDC.config,
+                    baseURL,
+                }
                 : OIDC.config;
 
             log.debug('OIDC baseURL', config.baseURL);
@@ -654,8 +693,8 @@ app.use(cookieParser()); // to parse cookies
     app.get('/config', (req, res) => {
         res.status(200).json({ message: config?.ui?.buttons || false });
     });
-app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
-app.use("/api/v1/user", require("../api/routes/userRoutes.js"))
+    app.use("/api/v1/subscription", require("../api/routes/subscriptionRoute.js"))
+    app.use("/api/v1/user", require("../api/routes/userRoutes.js"))
 
     // Brand configuration
     app.get('/brand', (req, res) => {
@@ -663,41 +702,41 @@ app.use("/api/v1/user", require("../api/routes/userRoutes.js"))
     });
 
     // main page
-   // Main page
-app.get('/', OIDCAuth, async (req, res) => {
-    const userId = req.query.id;
-    const ip = getIP(req);
+    // Main page
+    app.get('/', OIDCAuth, async (req, res) => {
+        const userId = req.query.id;
+        const ip = getIP(req);
 
-    // 1. If ID is missing, inject the "please login" page
-    if (!userId) {
-        return htmlInjector.injectHtml(views.loginLAlert, res);
-    }
-
-    try {
-        // 🔐 2. Validate if user exists in DB
-        const user = await User.findById(userId);
-        if (!user) {
-            return htmlInjector.injectHtml(views.loginLAlert, res); // Invalid user
+        // 1. If ID is missing, inject the "please login" page
+        if (!userId) {
+            return htmlInjector.injectHtml(views.loginLAlert, res);
         }
 
-        // 3. If OIDC is disabled AND host is protected, check allowed IPs
-        if (!OIDC.enabled && hostCfg.protected) {
-            if (allowedIP(ip)) {
-                hostCfg.authenticated = true;
-                return htmlInjector.injectHtml(views.landing, res);
-            } else {
-                hostCfg.authenticated = false;
-                return res.redirect('/login');
+        try {
+            // 🔐 2. Validate if user exists in DB
+            const user = await User.findById(userId);
+            if (!user) {
+                return htmlInjector.injectHtml(views.loginLAlert, res); // Invalid user
             }
-        }
 
-        // 4. Default behavior (OIDC enabled or protection disabled)
-        return htmlInjector.injectHtml(views.landing, res);
-    } catch (err) {
-        console.error('Error validating user:', err);
-        return htmlInjector.injectHtml(views.loginLAlert, res); // Also redirect on DB errors
-    }
-});
+            // 3. If OIDC is disabled AND host is protected, check allowed IPs
+            if (!OIDC.enabled && hostCfg.protected) {
+                if (allowedIP(ip)) {
+                    hostCfg.authenticated = true;
+                    return htmlInjector.injectHtml(views.landing, res);
+                } else {
+                    hostCfg.authenticated = false;
+                    return res.redirect('/login');
+                }
+            }
+
+            // 4. Default behavior (OIDC enabled or protection disabled)
+            return htmlInjector.injectHtml(views.landing, res);
+        } catch (err) {
+            console.error('Error validating user:', err);
+            return htmlInjector.injectHtml(views.loginLAlert, res); // Also redirect on DB errors
+        }
+    });
 
 
 
@@ -710,10 +749,10 @@ app.get('/', OIDCAuth, async (req, res) => {
     });
 
     // set new room name and join
-    app.get('/newroom', OIDCAuth, async(req, res) => {
+    app.get('/newroom', OIDCAuth, async (req, res) => {
         //log.info('/newroom - hostCfg ----->', hostCfg);
-    const userId = req.query.id;
- // 🔐 2. Validate if user exists in DB
+        const userId = req.query.id;
+        // 🔐 2. Validate if user exists in DB
         const user = await User.findById(userId);
         if (!user) {
             return htmlInjector.injectHtml(views.loginLAlert, res); // Invalid user
@@ -753,25 +792,25 @@ app.get('/', OIDCAuth, async (req, res) => {
             log.debug('Direct Join', req.query.id);
             const roomId = req.query.room
             const userId = req.query.id
-            console.log("roomId",roomId)
-            console.log("userId",userId)
- const existingUsers = await User.find({ 'meetings.roomId': roomId });
+            console.log("roomId", roomId)
+            console.log("userId", userId)
+            const existingUsers = await User.find({ 'meetings.roomId': roomId });
 
 
-    if (existingUsers.length > 0) {
-      console.log(`⚠️ Room '${roomId}' is already in use by ${existingUsers.length} user(s):`);
-      existingUsers.forEach((user, index) => {
-        console.log(`User ${index + 1}:`, {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          meetings: user.meetings,
-        });
-      });
-    } else {
-      // ✅ Safe to add meeting to user
-      await addMeetingToUser(userId, roomId);
-    }
+            if (existingUsers.length > 0) {
+                console.log(`⚠️ Room '${roomId}' is already in use by ${existingUsers.length} user(s):`);
+                existingUsers.forEach((user, index) => {
+                    console.log(`User ${index + 1}:`, {
+                        id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        meetings: user.meetings,
+                    });
+                });
+            } else {
+                // ✅ Safe to add meeting to user
+                await addMeetingToUser(userId, roomId);
+            }
             // https://meetix.mahitechnocrafts.injoin?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:30
             // https://meetix.mahitechnocrafts.injoin?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token
 
@@ -922,7 +961,7 @@ app.get('/', OIDCAuth, async (req, res) => {
         }
 
         try {
-            const user = await User.findOne({ email:username });
+            const user = await User.findOne({ email: username });
             if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
             const isValid = await bcrypt.compare(password, user.password);
@@ -933,7 +972,7 @@ app.get('/', OIDCAuth, async (req, res) => {
             const expiresIn = jwtCfg.JWT_EXP || '1h';
 
             const token = jwt.sign(payload, secret);
-            res.status(200).json({ message: 'Login successful', token,user });
+            res.status(200).json({ message: 'Login successful', token, user });
         } catch (err) {
             console.error('Login Error:', err);
             res.status(500).json({ message: 'Server error' });
@@ -941,40 +980,40 @@ app.get('/', OIDCAuth, async (req, res) => {
     });
 
     // To upload the vedio recording on azure
- app.post('/upload-video', upload.single('video'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).send('No video file uploaded.');
-    }
+    app.post('/upload-video', upload.single('video'), async (req, res) => {
+        try {
+            if (!req.file) {
+                return res.status(400).send('No video file uploaded.');
+            }
 
-    const fileName = req.file.originalname;
-    const fileExtension = path.extname(fileName).toLowerCase();
+            const fileName = req.file.originalname;
+            const fileExtension = path.extname(fileName).toLowerCase();
 
-    // Validate file extension
-    const validExtensions = ['.mp4', '.mkv', '.avi', '.mov', '.webm'];
-    if (!validExtensions.includes(fileExtension)) {
-      return res.status(400).send('Invalid file type. Please upload a video file.');
-    }
+            // Validate file extension
+            const validExtensions = ['.mp4', '.mkv', '.avi', '.mov', '.webm'];
+            if (!validExtensions.includes(fileExtension)) {
+                return res.status(400).send('Invalid file type. Please upload a video file.');
+            }
 
-    const params = {
-      Bucket: process.env.AWS_S3_BUCKET,
-      Key: `videos/${fileName}`,
-      Body: req.file.buffer,
-      ContentType: req.file.mimetype,
-    //   ACL: 'public-read', // Optional: makes the video publicly accessible
-    };
+            const params = {
+                Bucket: process.env.AWS_S3_BUCKET,
+                Key: `videos/${fileName}`,
+                Body: req.file.buffer,
+                ContentType: req.file.mimetype,
+                //   ACL: 'public-read', // Optional: makes the video publicly accessible
+            };
 
-    const uploadResult = await s3.upload(params).promise();
+            const uploadResult = await s3.upload(params).promise();
 
-    res.status(200).json({
-      message: 'Video uploaded successfully!',
-      fileUrl: uploadResult.Location,
+            res.status(200).json({
+                message: 'Video uploaded successfully!',
+                fileUrl: uploadResult.Location,
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('An error occurred while uploading the video.');
+        }
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('An error occurred while uploading the video.');
-  }
-});
 
     // Endpoint to get list of video recordings
     // Endpoint to get list of video recordings with additional properties
@@ -1017,32 +1056,32 @@ app.get('/', OIDCAuth, async (req, res) => {
     app.get('/join/:roomId', async (req, res) => {
         //
         const { roomId } = checkXSS(req.params);
-  const userId = req.query.id;
+        const userId = req.query.id;
 
 
-  
-  try {
-    // 🔍 Find users who already joined this room
-    const existingUsers = await User.find({ 'meetings.roomId': roomId });
+
+        try {
+            // 🔍 Find users who already joined this room
+            const existingUsers = await User.find({ 'meetings.roomId': roomId });
 
 
-    if (existingUsers.length > 0) {
-      console.log(`⚠️ Room '${roomId}' is already in use by ${existingUsers.length} user(s):`);
-      existingUsers.forEach((user, index) => {
-        console.log(`User ${index + 1}:`, {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          meetings: user.meetings,
-        });
-      });
-    } else {
-      // ✅ Safe to add meeting to user
-      await addMeetingToUser(userId, roomId);
-    }
-  } catch (err) {
-    console.error('❌ Error checking/saving meeting:', err);
-  }
+            if (existingUsers.length > 0) {
+                console.log(`⚠️ Room '${roomId}' is already in use by ${existingUsers.length} user(s):`);
+                existingUsers.forEach((user, index) => {
+                    console.log(`User ${index + 1}:`, {
+                        id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        meetings: user.meetings,
+                    });
+                });
+            } else {
+                // ✅ Safe to add meeting to user
+                await addMeetingToUser(userId, roomId);
+            }
+        } catch (err) {
+            console.error('❌ Error checking/saving meeting:', err);
+        }
 
 
         if (!roomId) {
@@ -1844,269 +1883,342 @@ app.get('/', OIDCAuth, async (req, res) => {
             }
         });
 
-        socket.on('join', async (dataObject, cb) => {
-            // console.log('Room Id: ', dataObject.room_id);
-         socket.room_id = dataObject.room_id
 
-  if (!roomExists(socket)) {
-    return cb({
-      error: "Room does not exist",
-    })
-  }
 
-  // Check participant limits BEFORE processing join
-  const room = getRoom(socket)
-  const currentParticipants = room.getPeersCount()
 
-  const limitCheck = await checkRoomParticipantLimit(socket.room_id, currentParticipants + 1)
 
-  if (!limitCheck.allowed) {
-    console.log("❌ Join denied - limit exceeded:", {
-      roomId: socket.room_id,
-      currentParticipants: currentParticipants,
-      limit: limitCheck.limit,
-    })
 
-    return cb({
-      error: "limitExceeded",
-      message: limitCheck.message,
-      limit: limitCheck.limit,
-      currentParticipants: currentParticipants,
-    })
-  }
 
-  console.log("✅ Join allowed:", {
-    roomId: socket.room_id,
-    currentParticipants: currentParticipants,
-    limit: limitCheck.limit,
-  })
-            // Get peer IPv4 (::1 Its the loopback address in ipv6, equal to 127.0.0.1 in ipv4)
-            const peer_ip = getIpSocket(socket);
 
-            // Get peer Geo Location
-            if (config?.integrations?.IPLookup?.enabled && peer_ip != '::1') {
-                dataObject.peer_geo = await getPeerGeoLocation(peer_ip);
-            }
 
-            const data = checkXSS(dataObject);
 
-            // log.info('User joined', data);
 
-            if (!Validator.isValidRoomName(socket.room_id)) {
-                log.warn('[Join] - Invalid room name', socket.room_id);
-                return cb('invalid');
-            }
 
-           
-            const { peer_name, peer_id, peer_uuid, peer_token, os_name, os_version, browser_name, browser_version } =
-                data.peer_info;
+      socket.on('join', async (dataObject, cb) => {
+    console.log("\n================== 📥 [JOIN EVENT RECEIVED] ==================");
+    console.log("👉 Incoming dataObject:", JSON.stringify(dataObject, null, 2));
 
-            let is_presenter = true;
+    socket.room_id = dataObject.room_id;
+    console.log("✅ Room ID set on socket:", socket.room_id);
 
-            // User Auth required or detect token, we check if peer valid
-            if (hostCfg.user_auth || peer_token) {
-                // Check JWT
-                if (peer_token) {
-                    try {
-                        const validToken = await isValidToken(peer_token);
+    // 🔍 Room exists check
+    if (!roomExists(socket)) {
+        console.log("❌ Room does NOT exist:", socket.room_id);
+        return cb({ error: "Room does not exist" });
+    }
 
-                        if (!validToken) {
-                            log.warn('[Join] - Invalid token', peer_token);
-                            return cb('unauthorized');
-                        }
+    // ✅ Room join करवा socket को (IMPORTANT for io.to() to work)
+    socket.join(socket.room_id);
+    console.log("✅ Socket joined room:", socket.room_id);
 
-                        const { username, password, presenter } = checkXSS(decodeToken(peer_token));
+    // 🔍 Check participant limits
+    const room = getRoom(socket);
+    const currentParticipants = room.getPeersCount();
+    console.log("👥 Current peers in room:", currentParticipants);
 
-                        const isPeerValid = await isAuthPeer(username, password);
+    const limitCheck = await checkRoomParticipantLimit(socket.room_id, currentParticipants + 1);
+    console.log("📊 Limit Check:", limitCheck);
 
-                        if (!isPeerValid) {
-                            // redirect peer to login page
-                            log.warn('[Join] - Invalid peer not authenticated', isPeerValid);
-                            return cb('unauthorized');
-                        }
+    if (!limitCheck.allowed) {
+        console.log("❌ Join denied - limit exceeded:", {
+            roomId: socket.room_id,
+            currentParticipants: currentParticipants,
+            limit: limitCheck.limit,
+        });
+        return cb({
+            error: "limitExceeded",
+            message: limitCheck.message,
+            limit: limitCheck.limit,
+            currentParticipants: currentParticipants,
+        });
+    }
 
-                        const is_presenter =
-                            presenter === '1' ||
-                            presenter === 'true' ||
-                            (hostCfg?.presenters?.join_first && room?.getPeersCount() === 0);
+    console.log("✅ Join allowed:", {
+        roomId: socket.room_id,
+        currentParticipants: currentParticipants,
+        limit: limitCheck.limit,
+    });
 
-                        log.debug('[Join] - HOST PROTECTED - USER AUTH check peer', {
-                            ip: peer_ip,
-                            peer_username: username,
-                            peer_password: password,
-                            peer_valid: isPeerValid,
-                            peer_presenter: is_presenter,
-                        });
-                    } catch (err) {
-                        log.error('[Join] - JWT error', {
-                            error: err.message,
-                            token: peer_token,
-                        });
-                        return cb('unauthorized');
-                    }
-                } else {
-                    if (!hostCfg.users_from_db) return cb('unauthorized');
-                }
+    // ✅ Peer data clean करो
+    const peer_ip = getIpSocket(socket);
+    console.log("🌍 Peer IP:", peer_ip);
 
-                if (!hostCfg.users_from_db) {
-                    const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
-                    if (!roomAllowedForUser) {
-                        log.warn('[Join] - Room not allowed for this peer', { peer_name, room_id: room.id });
-                        return cb('notAllowed');
-                    }
-                }
-            }
+    if (config?.integrations?.IPLookup?.enabled && peer_ip != '::1') {
+        dataObject.peer_geo = await getPeerGeoLocation(peer_ip);
+        console.log("📍 Geo Location Added:", dataObject.peer_geo);
+    }
 
-            // check if banned...
-            if (room.isBanned(peer_uuid)) {
-                log.info('[Join] - peer is banned!', {
-                    room_id: data.room_id,
-                    peer: {
-                        name: peer_name,
-                        uuid: peer_uuid,
-                        os_name: os_name,
-                        os_version: os_version,
-                        browser_name: browser_name,
-                        browser_version: browser_version,
-                    },
+    const data = checkXSS(dataObject);
+    console.log("🛡️ XSS cleaned data:", data);
+
+    // 🔐 Room name valid check
+    if (!Validator.isValidRoomName(socket.room_id)) {
+        console.log("❌ Invalid room name:", socket.room_id);
+        return cb('invalid');
+    }
+
+    // Peer info destructure
+    const { peer_name, peer_id, peer_uuid, peer_token, os_name, os_version, browser_name, browser_version } = data.peer_info;
+    console.log("🙋 Peer joined:", peer_name, "| Peer ID:", peer_id);
+
+    // 🚫 अगर banned है
+    if (room.isBanned(peer_uuid)) {
+        console.log("🚫 Peer is BANNED:", peer_name);
+        return cb('isBanned');
+    }
+
+    // ✅ Room में peer add करो
+    console.log("➕ Adding Peer to room...");
+    room.addPeer(new Peer(socket.id, data));
+
+    console.log("📈 initSockets", room.getPeersCount());
+
+    // 🎙 Silent Recording Logic
+    if (room.getPeersCount() == 1) {
+        console.log("🎯 2nd peer joined – emitting SilentRecordingCommand (START)");
+
+        io.to(socket.room_id).emit("silentRecordingCommand", {
+            action: "start",
+            roomId: socket.room_id,
+            purpose: "summary_generation"
+        });
+
+        console.log("✅ SilentRecordingCommand EMITTED to room:", socket.room_id);
+    } else {
+        console.log(`ℹ️ Peers count is ${room.getPeersCount()}, silent recording not started.`);
+    }
+
+    // ✅ Save attendee info
+    const Attendee = require('../api/models/Attendee.js');
+    const isPeerHost = room.getPeersCount() === 1;
+
+    const newAttendee = new Attendee({
+        roomId: socket.room_id,
+        peerName: data.peer_info.peer_name,
+        peerId: socket.id,
+        joinTime: new Date(),
+        isHost: isPeerHost,
+    });
+    await newAttendee.save();
+    console.log("📝 Attendee saved to DB:", peer_name);
+
+    // ✅ Active rooms log
+    const activeRooms = getActiveRooms();
+    console.log("📋 Active Rooms:", activeRooms);
+
+    const activeStreams = getRTMPActiveStreams();
+    console.log("📺 Active RTMP Streams:", activeStreams);
+
+    // ✅ बाकी का logic वही रहेगा...
+
+    console.log("================== ✅ JOIN EVENT COMPLETED ==================\n");
+
+    cb(room.toJson());
+});
+
+
+        socket.on('disconnect', async (reason) => {
+            if (!roomExists(socket)) return;
+
+            const { room, peer } = getRoomAndPeer(socket);
+
+            const { peer_name, peer_uuid } = peer || {};
+
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+
+            log.debug('[Disconnect] - peer name', { peer_name, reason });
+
+            room.removePeer(socket.id);
+            if (room.getPeersCount() === 0) {
+                io.to(socket.room_id).emit("silentRecordingCommand", {
+                    action: "stop",
+                    roomId: socket.room_id,
+                    purpose: "summary_generation"
                 });
-                return cb('isBanned');
+                console.log("🛑 Silent recording STOP – only 1 peer left in room:", socket.room_id);
             }
 
-            room.addPeer(new Peer(socket.id, data));
+            if (room.getPeersCount() === 0) {
+                //
+                stopRTMPActiveStreams(isPresenter, room);
+
+                roomList.delete(socket.room_id);
+
+                delete presenters[socket.room_id];
+
+                log.info('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
+
+                const activeRooms = getActiveRooms();
+
+                log.info('[Disconnect] - Last peer - current active rooms', activeRooms);
+
+                const activeStreams = getRTMPActiveStreams();
+
+                log.info('[Disconnect] - Last peer - current active RTMP streams', activeStreams);
+            }
+
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
+
+            if (isPresenter) removeIP(socket);
 
             const Attendee = require('../api/models/Attendee.js');
-            const isPeerHost = room.getPeersCount() === 1;
-            const newAttendee = new Attendee({
-                roomId: socket.room_id,
-                peerName: data.peer_info.peer_name,
-                peerId: socket.id,
-                joinTime: new Date(),
-                isHost: isPeerHost,
-            });
-            await newAttendee.save();
 
-            const activeRooms = getActiveRooms();
+            console.log('Updating attendee for peerId:', socket.id, 'roomId:', socket.room_id);
 
-            log.info('[Join] - current active rooms', activeRooms);
+            try {
+                const updatedDoc = await Attendee.findOneAndUpdate(
+                    { peerId: socket.id, roomId: socket.room_id },
+                    { leaveTime: new Date() },
+                    { new: true },
+                );
 
-            const activeStreams = getRTMPActiveStreams();
-
-            log.info('[Join] - current active RTMP streams', activeStreams);
-
-            if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
-
-            // Set the presenters
-            const presenter = {
-                peer_ip: peer_ip,
-                peer_name: peer_name,
-                peer_uuid: peer_uuid,
-                is_presenter: is_presenter,
-            };
-            // first we check if the username match the presenters username
-            if (hostCfg?.presenters?.list?.includes(peer_name)) {
-                presenters[socket.room_id][socket.id] = presenter;
-            } else {
-                // if not match the presenters username, the first one join room is the presenter
-                if (Object.keys(presenters[socket.room_id]).length === 0) {
-                    presenters[socket.room_id][socket.id] = presenter;
+                if (updatedDoc) {
+                    console.log('Leave time updated for:', updatedDoc.peerName);
+                } else {
+                    console.warn('No attendee found with given socket.id and room_id');
                 }
-            }
-
-            log.info('[Join] - Connected presenters grp by roomId', presenters);
-
-            const isPresenter = peer_token
-                ? is_presenter
-                : isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
-
-            const peer = room.getPeer(socket.id);
-
-            if (!peer) {
-                return cb({
-                    error: 'Peer does not exist in the room',
-                });
-            }
-
-            peer.updatePeerInfo({ type: 'presenter', status: isPresenter });
-
-            log.info('[Join] - Is presenter', {
-                roomId: socket.room_id,
-                peer_name: peer_name,
-                peer_presenter: isPresenter,
-            });
-
-            if (room.isLocked() && !isPresenter) {
-                log.debug('The user was rejected because the room is locked, and they are not a presenter');
-                return cb('isLocked');
+            } catch (error) {
+                console.error('Error updating leaveTime:', error);
             }
 
             const Session = require('../api/models/Session.js');
-            const isHost = room.getPeersCount() === 1;
 
-            if (isHost) {
-                let hostEmail = 'test@user.com'; // remove this
-
-                // uncomment the lines below when integrated with front end
-                // let hostEmail = null;
-                // try {
-                //     const decoded = jwt.verify(data.peer_info.peer_token, jwtCfg.JWT_KEY || 'default_jwt_secret');
-                //     hostEmail = decoded.email;
-                // } catch (err) {
-                //     log.warn('Could not decode token to extract host email:', err.message);
-                // }
-
-                const session = new Session({
-                    sessionId: room.id,
-                    sessionName: room.id,
-                    hostName: data.peer_info.peer_name,
-                    hostEmail: hostEmail,
-                });
-                await session.save();
-            }
-
-            if (room.isLobbyEnabled() && !isPresenter) {
-                log.debug(
-                    'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter',
-                );
-                room.broadCast(socket.id, 'roomLobby', {
-                    peer_id: peer_id,
-                    peer_name: peer_name,
-                    lobby_status: 'waiting',
-                });
-                return cb('isLobby');
-            }
-
-            if ((hostCfg.protected || hostCfg.user_auth) && isPresenter && !hostCfg.users_from_db) {
-                const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
-                if (!roomAllowedForUser) {
-                    log.warn('[Join] - Room not allowed for this peer', { peer_name, room_id: room.id });
-                    return cb('notAllowed');
+            // const peer = getRoom(socket)?.getPeer(socket.id);
+            if (peer && peer.peer_info?.type === 'presenter') {
+                const session = await Session.findOne({ sessionId: socket.room_id });
+                if (session && !session.endTime) {
+                    session.endTime = new Date();
+                    const durationMs = session.endTime - session.startTime;
+                    session.duration = new Date(durationMs).toISOString();
+                    await session.save();
                 }
             }
 
-            // SCENARIO: Notify when the first user join room and is awaiting assistance...
-            if (room.getPeersCount() === 1) {
-                nodemailer.sendEmailAlert('join', {
-                    room_id: room.id,
-                    peer_name: peer_name,
-                    domain: socket.handshake.headers.host.split(':')[0],
-                    os: os_name ? `${os_name} ${os_version}` : '',
-                    browser: browser_name ? `${browser_name} ${browser_version}` : '',
-                }); // config.email.alert: true
-            }
-
-            // handle WebHook
             if (webhook.enabled) {
-                // Trigger a POST request when a user joins
-                data.timestamp = log.getDateTime(false);
+                const data = {
+                    timestamp: log.getDateTime(false),
+                    room_id: socket.room_id,
+                    peer: peer.peer_info,
+                    reason: reason,
+                };
+                // Trigger a POST request when a user disconnects
                 axios
-                    .post(webhook.url, { event: 'join', data })
-                    .then((response) => log.debug('Join event tracked:', response.data))
-                    .catch((error) => log.error('Error tracking join event:', error.message));
+                    .post(webhook.url, { event: 'disconnect', data })
+                    .then((response) => log.debug('Disconnect event tracked:', response.data))
+                    .catch((error) => log.error('Error tracking disconnect event:', error.message));
             }
 
-            cb(room.toJson());
+            socket.room_id = null;
         });
+
+        socket.on('exitRoom', async (_, callback) => {
+            if (!roomExists(socket)) {
+                return callback({
+                    error: 'Not currently in a room',
+                });
+            }
+
+            const { room, peer } = getRoomAndPeer(socket);
+
+            const { peer_name, peer_uuid } = peer || {};
+
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+
+            log.debug('Exit room', peer_name);
+
+            log.info('[CALL FROM EXIT] - Peer id ', socket.id);
+            const Attendee = require('../api/models/Attendee.js');
+
+            try {
+                const updatedAttendee = await Attendee.findOneAndUpdate(
+                    { peerId: socket.id, roomId: socket.room_id },
+                    { leaveTime: new Date() },
+                    { new: true },
+                );
+
+                if (updatedAttendee) {
+                    console.log('Leave time updated for:', updatedAttendee.peerName);
+                } else {
+                    console.warn('No attendee found for:', socket.id, socket.room_id);
+                }
+            } catch (err) {
+                console.error('Error updating leaveTime:', err);
+            }
+
+            room.removePeer(socket.id);
+            if (room.getPeersCount() === 0) {
+                io.to(socket.room_id).emit("silentRecordingCommand", {
+                    action: "stop",
+                    roomId: socket.room_id,
+                    purpose: "summary_generation"
+                });
+                console.log("🛑 Silent recording STOP – only 1 peer left in room:", socket.room_id);
+            }
+
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
+
+            if (room.getPeersCount() === 0) {
+                //
+                stopRTMPActiveStreams(isPresenter, room);
+                const roomId = socket.room_id;
+                const attendees = await Attendee.find({ roomId });
+
+                const Session = require('../api/models/Session.js');
+                // const peer = getRoom(socket)?.getPeer(socket.id);
+                // if (peer && peer.peer_info?.type === 'presenter') {
+                const session = await Session.findOne({ sessionId: socket.room_id });
+                if (session && !session.endTime) {
+                    session.endTime = new Date();
+                    const durationMs = session.endTime - session.startTime;
+                    session.duration = new Date(durationMs).toISOString();
+                    session.totalAttendees = attendees.length;
+                    await session.save();
+                }
+                // }
+
+                roomList.delete(socket.room_id);
+
+                delete presenters[socket.room_id];
+
+                log.info('[REMOVE ME] - Last peer - current presenters grouped by roomId', presenters);
+
+                const activeRooms = getActiveRooms();
+
+                log.info('[REMOVE ME] - Last peer - current active rooms', activeRooms);
+
+                const activeStreams = getRTMPActiveStreams();
+
+                log.info('[REMOVE ME] - Last peer - current active RTMP streams', activeStreams);
+            }
+
+            if (isPresenter) removeIP(socket);
+
+            if (webhook.enabled) {
+                const data = {
+                    timestamp: log.getDateTime(false),
+                    room_id: socket.room_id,
+                    peer: peer.peer_info,
+                };
+                // Trigger a POST request when a user exits
+                axios
+                    .post(webhook.url, { event: 'exit', data })
+                    .then((response) => log.debug('ExitROom event tracked:', response.data))
+                    .catch((error) => log.error('Error tracking exitRoom event:', error.message));
+            }
+
+            socket.room_id = null;
+
+            callback('Successfully exited room');
+        });
+
+
+
+
+
+
+
+
+
 
         socket.on('getRouterRtpCapabilities', (_, callback) => {
             if (!roomExists(socket)) {
@@ -2438,7 +2550,7 @@ app.get('/', OIDCAuth, async (req, res) => {
             socket.emit('newProducers', producerList);
         });
 
-        socket.on('getPeerCounts', async ({}, callback) => {
+        socket.on('getPeerCounts', async ({ }, callback) => {
             if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
             }
@@ -2865,20 +2977,20 @@ app.get('/', OIDCAuth, async (req, res) => {
 
 
 
-      fetch('https://meetix.mahitechnocrafts.in/api/v1/user/messagePush', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    })
-                        .then(res => res.json())
-                        .then(saveRes => {
-                            console.log('Recording saved with metadata:', saveRes);
-                        })
-                        .catch(err => {
-                            console.error('Error saving recording to user:', err);
-                        });
+            fetch('http://localhost:3010/api/v1/user/messagePush', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then(res => res.json())
+                .then(saveRes => {
+                    console.log('Recording saved with metadata:', saveRes);
+                })
+                .catch(err => {
+                    console.error('Error saving recording to user:', err);
+                });
 
 
 
@@ -2952,7 +3064,7 @@ app.get('/', OIDCAuth, async (req, res) => {
         });
 
         // https://docs.heygen.com/reference/list-avatars-v2
-        socket.on('getAvatarList', async ({}, cb) => {
+        socket.on('getAvatarList', async ({ }, cb) => {
             if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
 
@@ -2976,7 +3088,7 @@ app.get('/', OIDCAuth, async (req, res) => {
         });
 
         // https://docs.heygen.com/reference/list-voices-v2
-        socket.on('getVoiceList', async ({}, cb) => {
+        socket.on('getVoiceList', async ({ }, cb) => {
             if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
 
@@ -3219,7 +3331,7 @@ app.get('/', OIDCAuth, async (req, res) => {
             }
         });
 
-        socket.on('getRTMP', async ({}, cb) => {
+        socket.on('getRTMP', async ({ }, cb) => {
             if (!roomExists(socket)) return;
 
             const room = getRoom(socket);
@@ -3456,183 +3568,7 @@ app.get('/', OIDCAuth, async (req, res) => {
             room.broadCast(socket.id, 'editorUpdate', data);
         });
 
-        socket.on('disconnect', async (reason) => {
-            if (!roomExists(socket)) return;
 
-            const { room, peer } = getRoomAndPeer(socket);
-
-            const { peer_name, peer_uuid } = peer || {};
-
-            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
-
-            log.debug('[Disconnect] - peer name', { peer_name, reason });
-
-            room.removePeer(socket.id);
-
-            if (room.getPeersCount() === 0) {
-                //
-                stopRTMPActiveStreams(isPresenter, room);
-
-                roomList.delete(socket.room_id);
-
-                delete presenters[socket.room_id];
-
-                log.info('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
-
-                const activeRooms = getActiveRooms();
-
-                log.info('[Disconnect] - Last peer - current active rooms', activeRooms);
-
-                const activeStreams = getRTMPActiveStreams();
-
-                log.info('[Disconnect] - Last peer - current active RTMP streams', activeStreams);
-            }
-
-            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
-
-            if (isPresenter) removeIP(socket);
-
-            const Attendee = require('../api/models/Attendee.js');
-
-            console.log('Updating attendee for peerId:', socket.id, 'roomId:', socket.room_id);
-
-            try {
-                const updatedDoc = await Attendee.findOneAndUpdate(
-                    { peerId: socket.id, roomId: socket.room_id },
-                    { leaveTime: new Date() },
-                    { new: true },
-                );
-
-                if (updatedDoc) {
-                    console.log('Leave time updated for:', updatedDoc.peerName);
-                } else {
-                    console.warn('No attendee found with given socket.id and room_id');
-                }
-            } catch (error) {
-                console.error('Error updating leaveTime:', error);
-            }
-
-            const Session = require('../api/models/Session.js');
-
-            // const peer = getRoom(socket)?.getPeer(socket.id);
-            if (peer && peer.peer_info?.type === 'presenter') {
-                const session = await Session.findOne({ sessionId: socket.room_id });
-                if (session && !session.endTime) {
-                    session.endTime = new Date();
-                    const durationMs = session.endTime - session.startTime;
-                    session.duration = new Date(durationMs).toISOString();
-                    await session.save();
-                }
-            }
-
-            if (webhook.enabled) {
-                const data = {
-                    timestamp: log.getDateTime(false),
-                    room_id: socket.room_id,
-                    peer: peer.peer_info,
-                    reason: reason,
-                };
-                // Trigger a POST request when a user disconnects
-                axios
-                    .post(webhook.url, { event: 'disconnect', data })
-                    .then((response) => log.debug('Disconnect event tracked:', response.data))
-                    .catch((error) => log.error('Error tracking disconnect event:', error.message));
-            }
-
-            socket.room_id = null;
-        });
-
-        socket.on('exitRoom', async (_, callback) => {
-            if (!roomExists(socket)) {
-                return callback({
-                    error: 'Not currently in a room',
-                });
-            }
-
-            const { room, peer } = getRoomAndPeer(socket);
-
-            const { peer_name, peer_uuid } = peer || {};
-
-            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
-
-            log.debug('Exit room', peer_name);
-
-            log.info('[CALL FROM EXIT] - Peer id ', socket.id);
-            const Attendee = require('../api/models/Attendee.js');
-
-            try {
-                const updatedAttendee = await Attendee.findOneAndUpdate(
-                    { peerId: socket.id, roomId: socket.room_id },
-                    { leaveTime: new Date() },
-                    { new: true },
-                );
-
-                if (updatedAttendee) {
-                    console.log('Leave time updated for:', updatedAttendee.peerName);
-                } else {
-                    console.warn('No attendee found for:', socket.id, socket.room_id);
-                }
-            } catch (err) {
-                console.error('Error updating leaveTime:', err);
-            }
-
-            room.removePeer(socket.id);
-
-            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
-
-            if (room.getPeersCount() === 0) {
-                //
-                stopRTMPActiveStreams(isPresenter, room);
-                const roomId = socket.room_id;
-                const attendees = await Attendee.find({ roomId });
-
-                const Session = require('../api/models/Session.js');
-                // const peer = getRoom(socket)?.getPeer(socket.id);
-                // if (peer && peer.peer_info?.type === 'presenter') {
-                const session = await Session.findOne({ sessionId: socket.room_id });
-                if (session && !session.endTime) {
-                    session.endTime = new Date();
-                    const durationMs = session.endTime - session.startTime;
-                    session.duration = new Date(durationMs).toISOString();
-                    session.totalAttendees = attendees.length;
-                    await session.save();
-                }
-                // }
-
-                roomList.delete(socket.room_id);
-
-                delete presenters[socket.room_id];
-
-                log.info('[REMOVE ME] - Last peer - current presenters grouped by roomId', presenters);
-
-                const activeRooms = getActiveRooms();
-
-                log.info('[REMOVE ME] - Last peer - current active rooms', activeRooms);
-
-                const activeStreams = getRTMPActiveStreams();
-
-                log.info('[REMOVE ME] - Last peer - current active RTMP streams', activeStreams);
-            }
-
-            if (isPresenter) removeIP(socket);
-
-            if (webhook.enabled) {
-                const data = {
-                    timestamp: log.getDateTime(false),
-                    room_id: socket.room_id,
-                    peer: peer.peer_info,
-                };
-                // Trigger a POST request when a user exits
-                axios
-                    .post(webhook.url, { event: 'exit', data })
-                    .then((response) => log.debug('ExitROom event tracked:', response.data))
-                    .catch((error) => log.error('Error tracking exitRoom event:', error.message));
-            }
-
-            socket.room_id = null;
-
-            callback('Successfully exited room');
-        });
 
         // Helpers
 
